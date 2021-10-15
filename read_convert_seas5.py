@@ -49,7 +49,7 @@ def convert_seasonal_forecast(filename, dem_model, dem_forcing,
 
     # Loop through ensembles
     idx = 0
-    for ensemble in seas.number[:1]:
+    for ensemble in seas.number:
         # Extract ensemble
         tmp = seas.sel(number=ensemble).load()
 
