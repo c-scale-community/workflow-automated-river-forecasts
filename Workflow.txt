@@ -1,0 +1,10 @@
+Workflow: To be executed on the 15th of the month:
+1. download SEAS5 forecast for the current month 
+2. preprocess SEAS5 forecast for the current month (incl upcoming 5 months) for wflow
+3. download ERA5 for the past month (month-1)
+4. pre-process ERA5 for wflow for the past month
+5. copy state of wflow ERA5 run month-2 to instates
+6. run wflow with ERA5 for the past month
+7. copy endstate wflow ERA5 run to instates
+8. run wflow with SEAS5 data for all ensemble members
+
