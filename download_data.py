@@ -25,9 +25,15 @@ def download_forcing(source, month, year, output):
         raise ValueError(f"source option '{source}' is not a valid option, please choose 'ERA5' or 'SEAS5'")
         
 
-def download_era5(month, year, output):
+def download_era5(currentMonth, year, output):
     """Download Era5 data."""
     c = cdsapi.Client()
+    
+    if currentMonth > 1:
+        month = currentMonth - 1
+    else: 
+        month = 12
+        year = year - 1
 
     filename = f'ERA5_{year}_{month}.nc'
     output_path = os.path.join(output, filename)
