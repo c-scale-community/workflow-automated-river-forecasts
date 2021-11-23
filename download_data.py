@@ -1,39 +1,39 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Oct 29 14:25:36 2021
-
 @author: Buitink
 """
 
-import cdsapi
-import click
 import os
+import click
+import cdsapi
+from datetime import date
 
 @click.command()
-@click.option('--source', required=True, type=str, help='Source of forcing data ["ERA5", "SEAS5"]')
-@click.option('--year', required=True, type=str, help='Year of required data')
-@click.option('--month', required=True, type=str, help='Month of required data')
-@click.option('--output', required=True, type=str, help='Output path for nc file',)
-def download_forcing(source, month, year, output):
+@click.option('--output_dir', required=True, type=str, help='Output directory for downloaded NetCDF files',)
+def download_forcing(output_dir):
     
-    # Determine which function to use
-    if source.upper() == "ERA5":
-        download_era5(month, year, output)
-    elif source.upper() == "SEAS5":
-        download_seas5(month, year, output)
+    # Get current date, for month and year information
+    current_date = date.today()
+    current_month = current_date.month
+    current_year = current_date.year
+    
+    # Set correct previous month and year values for ERA5 data download
+    if current_month != 1:
+        prev_month = current_month - 1
+        prev_year = current_year
     else:
-        raise ValueError(f"source option '{source}' is not a valid option, please choose 'ERA5' or 'SEAS5'")
-        
-
-def download_era5(currentMonth, year, output):
+        prev_month = 12
+        prev_year = current_year - 1
+    
+    # Download ERA5 data
+    download_era5(month=prev_month, year=prev_year, output=output_dir)
+    # Download SEAS5 data
+    download_seas5(month=current_month, year=current_year, output=output_dir)
+    
+def download_era5(month, year, output):
     """Download Era5 data."""
     c = cdsapi.Client()
-    
-    if currentMonth > 1:
-        month = currentMonth - 1
-    else: 
-        month = 12
-        year = year - 1
 
     filename = f'ERA5_{year}_{month}.nc'
     output_path = os.path.join(output, filename)
@@ -42,18 +42,15 @@ def download_era5(currentMonth, year, output):
         'reanalysis-era5-single-levels',
         {
             'product_type':'reanalysis',
-
             'variable': [
                 'mean_sea_level_pressure',
                 'surface_solar_radiation_downwards',
                 '2m_temperature',
                 'total_precipitation'
             ],
-            'year':[
-                year
-            ],
+            'year':year,
             'area': '46.00/5.00/52.50/12.50',
-            'month':[month],
+            'month':month,
             'day':[
                 '01','02','03',
                 '04','05','06',
