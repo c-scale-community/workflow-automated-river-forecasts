@@ -1,23 +1,21 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Oct 29 14:33:40 2021
-
 @author: Buitink
 """
-
+import os
 import click
 import numpy as np
 import xarray as xr
-# import rasterio, rioxarray
 from hydromt import workflows
-# import geopandas as gpd
+from datetime import date
 
 @click.command()
-@click.option('--source', required=True, type=str, help='Source of forcing data ["ERA5", "SEAS5"]')
-@click.option('--forcing_file', required=True, type=str, help='Filename of NetCDF with forcing data')
+@click.option('--dir_downloads', required=True, type=str, help='Path where the downloaded ERA5 and SEAS5 data is stored',)
+@click.option('--output_dir', required=True, type=str, help='Path to store the convert forcing files',)
 
 # Optional settings
-@click.option('--wflow_staticmaps_file', default="staticmaps.nc",
+@click.option('--wflow_staticmaps_file', default="wflow_rhine/staticmaps.nc",
               type=str, help='NetCDF with all the staticmaps (including wflow_dem)')
 @click.option('--era5_dem_file', default="orography_era5_rhine.grib", 
               type=str, help='NetCDF with all the staticmaps (including wflow_dem)')
@@ -26,44 +24,72 @@ from hydromt import workflows
 @click.option('--lapse_rate', default=-0.0065, 
               type=float, help='Lapse rate for temperature correction')
 
-def convert_data(source, forcing_file, wflow_staticmaps_file, 
-                 era5_dem_file, seas5_dem_file, lapse_rate):
+def convert_data(dir_downloads, wflow_staticmaps_file, era5_dem_file,
+                 seas5_dem_file, lapse_rate, output_dir):
+    # Get current date, for month and year information
+    current_date = date.today()
+    current_month = current_date.month
+    current_year = current_date.year
     
-    # Determine which function to use
-    if source.upper() == "ERA5":
-        # Link to correct DEM files and functions
-        dem_forcing_file = era5_dem_file
-        convert_func = convert_era5
-        
-    elif source.upper() == "SEAS5":
-        dem_forcing_file = seas5_dem_file
-        convert_func = convert_seas5
-        
+    # Set correct previous month and year values for ERA5 data download
+    if current_month != 1:
+        prev_month = current_month - 1
+        prev_year = current_year
     else:
-        raise ValueError(f"source option '{source}' is not a valid option, please choose 'ERA5' or 'SEAS5'")
-        
-    # Extract wflow model DEM from staticmaps    
-    dem_model = get_dem_model(staticmapfile = wflow_staticmaps_file)        
-    # Get forcing DEM 
-    dem_forcing = get_dem_forcing(dem_forcing_file)   
+        prev_month = 12
+        prev_year = current_year - 1
     
-    # Convert data
-    convert_func(filename=forcing_file, dem_model=dem_model, dem_forcing=dem_forcing, 
-                  lapse_rate=lapse_rate, crs=4326)
+    # Extract wflow model DEM from staticmaps    
+    dem_model = get_dem_model(staticmapfile = wflow_staticmaps_file)
+    
+    # ERA5 convert
+    era5_file = os.path.join(dir_downloads, f'ERA5_{prev_year}_{prev_month}.nc')
+    dem_era5 = get_dem_forcing(era5_dem_file)
+    convert_era5(filename=era5_file, dem_model=dem_model, dem_forcing=dem_era5, 
+                  lapse_rate=lapse_rate, crs=4326, output_dir=output_dir)
+    
+    # SEAS5 convert
+    seas5_file = os.path.join(dir_downloads, f'SEAS5_{current_year}_{current_month}.nc')
+    dem_seas5 = get_dem_forcing(seas5_dem_file)
+    convert_seas5(filename=seas5_file, dem_model=dem_model, dem_forcing=dem_seas5, 
+                  lapse_rate=lapse_rate, crs=4326, output_dir=output_dir)
+
+# def convert_data(source, forcing_file, wflow_staticmaps_file, output_dir,
+#                  era5_dem_file, seas5_dem_file, lapse_rate):
+    
+#     # Determine which function to use
+#     if source.upper() == "ERA5":
+#         # Link to correct DEM files and functions
+#         dem_forcing_file = era5_dem_file
+#         convert_func = convert_era5
+        
+#     elif source.upper() == "SEAS5":
+#         dem_forcing_file = seas5_dem_file
+#         convert_func = convert_seas5
+        
+#     else:
+#         raise ValueError(f"source option '{source}' is not a valid option, please choose 'ERA5' or 'SEAS5'")
+        
+#     # Extract wflow model DEM from staticmaps    
+#     dem_model = get_dem_model(staticmapfile = wflow_staticmaps_file)        
+#     # Get forcing DEM 
+#     dem_forcing = get_dem_forcing(dem_forcing_file)   
+    
+#     # Convert data
+#     convert_func(filename=forcing_file, dem_model=dem_model, dem_forcing=dem_forcing, 
+#                   lapse_rate=lapse_rate, crs=4326, output_dir=output_dir)
                  
     
 
 def temp_correction(dem, lapse_rate=-0.0065):
 
     """Temperature correction based on elevation data.
-
     Parameters
     ----------
     dem : xarray.DataArray
         DataArray with elevation
     lapse_rate : float, default -0.0065
         lapse rate of temperature [°C m-1]
-
     Returns
     -------
     temp_add : xarray.DataArray
@@ -87,7 +113,7 @@ def get_dem_forcing(filename):
     data = data/9.80665 # Correct from m2/s2 to m
     return data
 
-def convert_era5(filename, dem_model, dem_forcing, 
+def convert_era5(filename, dem_model, dem_forcing, output_dir,
                  lapse_rate=-0.0065, crs=4326):
     
     # Open seasonal forecast and set CRS
@@ -154,14 +180,15 @@ def convert_era5(filename, dem_model, dem_forcing,
             }
     
     # Export to NetCDF
-    forcing.to_netcdf(
-        "forcing_ERA5_{}_{}.nc".format(forcing.time[0].dt.strftime('%Y-%m-%d').values,
-                                       forcing.time[-1].dt.strftime('%Y-%m-%d').values
-                                       ),
+    forcing.to_netcdf(os.path.join(output_dir, 
+        "forcing_ERA5_{}_{}.nc".format(
+            forcing.time[0].dt.strftime('%Y-%m-%d').values,
+            forcing.time[-1].dt.strftime('%Y-%m-%d').values
+            )),
         encoding=encoding,
         )
     
-def convert_seas5(filename, dem_model, dem_forcing, 
+def convert_seas5(filename, dem_model, dem_forcing, output_dir,
                   lapse_rate=-0.0065, crs=4326):
     
     # Open seasonal forecast and set CRS
@@ -243,12 +270,12 @@ def convert_seas5(filename, dem_model, dem_forcing,
                     for v in forcing.data_vars.keys()
                 }
         # Export to netcdf    
-        forcing.to_netcdf(
+        forcing.to_netcdf(os.path.join(output_dir,
             "forcing_SEAS5_ens{}_{}_{}.nc".format(
                 idx,
                 forcing.time[0].dt.strftime('%Y-%m-%d').values,
                 forcing.time[-1].dt.strftime('%Y-%m-%d').values
-                ),
+                )),
             encoding=encoding,
             )
         
