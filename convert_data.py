@@ -5,6 +5,7 @@ Created on Fri Oct 29 14:33:40 2021
 """
 import os
 import click
+import logging
 import numpy as np
 import xarray as xr
 from hydromt import workflows
@@ -26,6 +27,12 @@ from datetime import date
 
 def convert_data(dir_downloads, wflow_staticmaps_file, era5_dem_file,
                  seas5_dem_file, lapse_rate, output_dir):
+    
+    # Prepare logger
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s - %(levelname)s - %(message)s')
+    
+    
     # Get current date, for month and year information
     current_date = date.today()
     current_month = current_date.month
@@ -45,14 +52,18 @@ def convert_data(dir_downloads, wflow_staticmaps_file, era5_dem_file,
     # ERA5 convert
     era5_file = os.path.join(dir_downloads, f'ERA5_{prev_year}_{prev_month}.nc')
     dem_era5 = get_dem_forcing(era5_dem_file)
+    logging.info("Start converting of ERA5 dataset")
     convert_era5(filename=era5_file, dem_model=dem_model, dem_forcing=dem_era5, 
                   lapse_rate=lapse_rate, crs=4326, output_dir=output_dir)
+    logging.info("Copmleted converting of ERA5 dataset")
     
     # SEAS5 convert
     seas5_file = os.path.join(dir_downloads, f'SEAS5_{current_year}_{current_month}.nc')
     dem_seas5 = get_dem_forcing(seas5_dem_file)
+    logging.info("Start converting of SEAS5 dataset")
     convert_seas5(filename=seas5_file, dem_model=dem_model, dem_forcing=dem_seas5, 
-                  lapse_rate=lapse_rate, crs=4326, output_dir=output_dir)
+                  lapse_rate=lapse_rate, crs=4326, output_dir=output_dir, log=logging)
+    logging.info("Copmleted converting of SEAS5 dataset")
 
 # def convert_data(source, forcing_file, wflow_staticmaps_file, output_dir,
 #                  era5_dem_file, seas5_dem_file, lapse_rate):
@@ -188,7 +199,7 @@ def convert_era5(filename, dem_model, dem_forcing, output_dir,
         encoding=encoding,
         )
     
-def convert_seas5(filename, dem_model, dem_forcing, output_dir,
+def convert_seas5(filename, dem_model, dem_forcing, output_dir, log,
                   lapse_rate=-0.0065, crs=4326):
     
     # Open seasonal forecast and set CRS
@@ -199,6 +210,7 @@ def convert_seas5(filename, dem_model, dem_forcing, output_dir,
     # Loop through ensembles
     idx = 0
     for ensemble in seas.number:
+        log.info(f"Converting SEAS5 ensemble {ensemble.values}")
         # Extract ensemble
         tmp = seas.sel(number=ensemble).load()
 
