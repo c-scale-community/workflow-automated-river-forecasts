@@ -131,6 +131,10 @@ def convert_era5(filename, dem_model, dem_forcing, output_dir,
     # TODO CHUNKS CAN BE ADJUSTED WHEN RUNNING IN THE CLOUD?
     era = xr.open_dataset(filename, chunks = {"time" : 500})
     era = era.rio.write_crs(crs)
+    
+    # expver variable is added for recent ERA data
+    if "expver" in era.variables:
+        era = era.reduce(np.nansum, dim='expver',keep_attrs=True)
 
     era = era.resample(time = "D", label = "left", closed = "left").mean()
     era = era.rename({"longitude": "x", "latitude": "y"})
