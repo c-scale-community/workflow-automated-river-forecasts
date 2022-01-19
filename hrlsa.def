@@ -1,0 +1,56 @@
+Bootstrap: library
+From: ubuntu
+
+%help
+    This Singularity definitition contains a python setup and installs requirements for the hrlsa
+    project.
+
+%files
+    requirements.txt /opt
+
+%post -c /bin/bash
+    # Install apt-get packages
+    apt-get update && \
+    apt-get install -y \
+        build-essential \
+        software-properties-common \
+        zlib1g-dev \
+        libncurses5-dev \
+        libgdbm-dev \
+        libnss3-dev \
+        libssl-dev \
+        libreadline-dev \
+        libffi-dev \
+        libsqlite3-dev \
+        wget \
+        libbz2-dev
+
+    # Install python
+    export PYTHON_VERSION=3.9.10
+    export PYTHON_VERSION_SHORT=${PYTHON_VERSION%.*}
+
+    wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz && \
+    tar -xf Python-${PYTHON_VERSION}.tgz && \
+    cd Python-${PYTHON_VERSION} && \
+    ./configure --enable-optimizations && \
+    make -j 12 && \
+    make altinstall && \
+    cd .. && \
+    rm Python-${PYTHON_VERSION}.tgz
+
+    # alias python version in singularity environment
+    echo "alias python=python${PYTHON_VERSION_SHORT}" >> $SINGULARITY_ENVIRONMENT
+    echo "alias pip=pip${PYTHON_VERSION_SHORT}" >> $SINGULARITY_ENVIRONMENT
+
+    # install gdal prerequisites
+    add-apt-repository -y ppa:ubuntugis/ppa && \
+        apt-get update
+    apt-get install -y gdal-bin
+    apt-get install -y libgdal-dev
+    rm -rf /var/lib/apt/lists/*
+
+    export CPLUS_INCLUDE_PATH=/usr/include/gdal
+    export C_INCLUDE_PATH=/usr/include/gdal
+
+    # # Install requirements
+    python${PYTHON_VERSION_SHORT} -m pip install -r /opt/requirements.txt
