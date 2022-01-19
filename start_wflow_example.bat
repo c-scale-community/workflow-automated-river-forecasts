@@ -1,0 +1,2 @@
+julia start_wflow.jl --toml_filename "wflow_sbm_base.toml" --output_dir "output_era/" --instates_filename "output_era/outstates.nc" --forcing_filename "data/forcing_ERA5_2021-12-01_2021-12-31.nc"
+pause
