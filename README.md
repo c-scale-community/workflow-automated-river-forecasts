@@ -29,14 +29,14 @@ trigger date of around 2022-01-15 as an example):
  * wflow with ERA5 data, covering 2021-12-01 to 2021-12-31
  * wflow with SEAS5 data, which covers 2022-01-01 to 2022-08-02 (50 times, for each ensemble member)
 
-Both runs need to be initialised, such that the model starts with "warm" states. The wflow model outputs a "oustates.nc" file
-in the output directory of every simulation, which can be used to initialise a new simulation. Again using a trigger date of 
-around 2022-01-15 as an example, the following states need to be used to initilase the two simulation types
- * wflow+ERA5 data (2021-12): initialised with the outstates from the wflow+ERA5 simulation from the month before (2021-11)
- * wflow+SEAS5 data (2022-01): initialised with the outstates from the most recent wflow+ERA5 simulation (2021-12), same for 
+Both runs need to be initialized, such that the model starts with "warm" states. The wflow model outputs a "oustates.nc" file
+in the output directory of every simulation, which can be used to initialize a new simulation. Again using a trigger date of 
+around 2022-01-15 as an example, the following states need to be used to initialize the two simulation types
+ * wflow+ERA5 data (2021-12): initialized with the outstates from the wflow+ERA5 simulation from the month before (2021-11)
+ * wflow+SEAS5 data (2022-01): initialized with the outstates from the most recent wflow+ERA5 simulation (2021-12), same for 
  every ensemble member.
 
-4. Post processing to produce figures/accessable data
+4. Post processing to produce figures/accessible data
 TBD
 
 
@@ -218,7 +218,7 @@ TBD
 │       │   ├── output.nc
 │       │   └── outstates.nc
 │       └── ...
-├── Public                                                      # Directory to store output (figures/processed model output) in, accessable from "outside"
+├── Public                                                      # Directory to store output (figures/processed model output) in, accessible from "outside"
 │   └── test.txt
 ├── Share
 │   └── ...
