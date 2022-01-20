@@ -43,6 +43,7 @@ TBD
 ## Folder structure
 
 ### Current structure
+```bash
 .
 ├── Data
 │   ├── ERA5_2021_10.nc
@@ -143,11 +144,12 @@ TBD
             ├── wflow_sbm_era.toml
             ├── wflow_sbm_seas.toml
             └── wflow_sbm.toml
-
+```
 
 
 
 ### Proposed structure
+```bash
 .
 ├── Data
 │   ├── Model_input
@@ -248,3 +250,4 @@ TBD
     ├── slurm-984001.out
     ├── slurm-984002.out
     └── slurm-984003.out
+```    
