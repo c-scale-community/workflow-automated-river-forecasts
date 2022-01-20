@@ -21,3 +21,7 @@ See the script for the optional settings (location of model maps, ERA5 and SEAS5
 python convert_data.py --dir_downloads "workdir" --output_dir "wflow_rhine"
 ```
 
+## Upload files to spider
+```
+rsync -W -e "ssh -i <<your private key>>" hrlsa.sif <<your surf email>>@spider.surfsara.nl:/project/hrlsa/<<target>>
+```
