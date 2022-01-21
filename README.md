@@ -41,9 +41,26 @@ around 2022-01-15 as an example, the following states need to be used to initial
  * wflow+SEAS5 data (2022-01): initialized with the outstates from the most recent wflow+ERA5 simulation (2021-12), same for 
  every ensemble member.
 
-4. Post processing to produce figures/accessible data
-TBD
+Usage:
+```
+julia start_wflow.jl --toml_filename "wflow_sbm_base.toml" --output_dir "output_era/" --instates_filename "output_era/outstates.nc" --forcing_filename "data/forcing_ERA5_2021-12-01_2021-12-31.nc"
+```
+`--toml_filename` refers to the TOML file with the settings for wflow, the exact details for each run will be modified by this 
+script, `--instates_filename` to the location where the states are stored to initialize the model with, `--forcing_filename` to 
+the location where the forcing file is located (output from `convert_data.py`).
 
+4. Post processing to produce figures/accessible data
+
+Create a figure showing the results of the model output. Currently creates a .png file with the discharge timeseries: a
+single line for the ERA5 simulation of the previous months, and 50 timeseries for the SEAS5 simulations starting from the 
+current month to 7 months in the future.
+
+Usage:
+```
+python plot_wflow_results.py --path_to_main_dir "../../" --filename_figure "discharge_ts.png"
+```
+`--path_to_main_dir` refers to the path of the main folder, which contains the folders `Data`, `Public`, `Share`, and `Software`, 
+`--filename_figure` is the filename of the resulting figure (including figure format), which will be saved in the `Public` folder.
 
 ## Folder structure
 

@@ -19,9 +19,9 @@ from datetime import date
 @click.option('--wflow_staticmaps_file', default="wflow_rhine/staticmaps.nc",
               type=str, help='NetCDF with all the staticmaps (including wflow_dem)')
 @click.option('--era5_dem_file', default="orography_era5_rhine.grib", 
-              type=str, help='NetCDF with all the staticmaps (including wflow_dem)')
+              type=str, help='Raster file with ERA5 orography data (geopotential height)')
 @click.option('--seas5_dem_file', default="orography_seas5_rhine.grib", 
-              type=str, help='NetCDF with all the staticmaps (including wflow_dem)')
+              type=str, help='Raster file with SEAS5 orography data (geopotential height)')
 @click.option('--lapse_rate', default=-0.0065, 
               type=float, help='Lapse rate for temperature correction')
 
