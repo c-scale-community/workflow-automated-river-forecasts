@@ -1,56 +1,37 @@
-Bootstrap: library
-From: ubuntu
+BootStrap: docker
+From: python:3.9-slim
 
-%help
-    This Singularity definitition contains a python setup and installs requirements for the hrlsa
-    project.
+%setup
+    # Hack to fix multiprocessing issues on WSL2
+    if [ -L /dev/shm ]; then
+        if [ ! -d /run/shm ]; then exit 1; fi
+        mkdir -p /dev/manual
+        ln -s /dev/manual ${SINGULARITY_ROOTFS}/run/shm
+        touch ${SINGULARITY_ROOTFS}/rm_run_shm
+    fi
 
 %files
-    requirements.txt /opt
+	environment.yaml /opt/environment.yaml
 
-%post -c /bin/bash
-    # Install apt-get packages
-    apt-get update && \
+%post
+    # Install cli tools
+    apt-get update
     apt-get install -y \
-        build-essential \
         software-properties-common \
-        zlib1g-dev \
-        libncurses5-dev \
-        libgdbm-dev \
-        libnss3-dev \
-        libssl-dev \
-        libreadline-dev \
-        libffi-dev \
-        libsqlite3-dev \
-        wget \
-        libbz2-dev
-
-    # Install python
-    export PYTHON_VERSION=3.9.10
-    export PYTHON_VERSION_SHORT=${PYTHON_VERSION%.*}
-
-    wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz && \
-    tar -xf Python-${PYTHON_VERSION}.tgz && \
-    cd Python-${PYTHON_VERSION} && \
-    ./configure --enable-optimizations && \
-    make -j 12 && \
-    make altinstall && \
-    cd .. && \
-    rm Python-${PYTHON_VERSION}.tgz
-
-    # alias python version in singularity environment
-    echo "alias python=python${PYTHON_VERSION_SHORT}" >> $SINGULARITY_ENVIRONMENT
-    echo "alias pip=pip${PYTHON_VERSION_SHORT}" >> $SINGULARITY_ENVIRONMENT
-
-    # install gdal prerequisites
-    add-apt-repository -y ppa:ubuntugis/ppa && \
-        apt-get update
-    apt-get install -y gdal-bin
-    apt-get install -y libgdal-dev
+        wget
+    apt-get clean
     rm -rf /var/lib/apt/lists/*
 
-    export CPLUS_INCLUDE_PATH=/usr/include/gdal
-    export C_INCLUDE_PATH=/usr/include/gdal
+    # Install conda
+    wget https://repo.anaconda.com/miniconda/Miniconda3-py39_4.10.3-Linux-x86_64.sh
+    chmod +x Miniconda3-py39_4.10.3-Linux-x86_64.sh
+    ./Miniconda3-py39_4.10.3-Linux-x86_64.sh -b -p /miniconda3
+    rm ./Miniconda3-py39_4.10.3-Linux-x86_64.sh
+    export PATH=/miniconda3/bin:$PATH
+    conda init bash
 
-    # # Install requirements
-    python${PYTHON_VERSION_SHORT} -m pip install -r /opt/requirements.txt
+    # add to path when running container
+    echo "export PATH=/miniconda3/bin:\$PATH" >> $SINGULARITY_ENVIRONMENT
+
+    # Install python requirements
+    conda env update --name base --file /opt/environment.yaml --prune
