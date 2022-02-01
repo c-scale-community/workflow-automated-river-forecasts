@@ -9,11 +9,12 @@ import logging
 import numpy as np
 import xarray as xr
 from hydromt import workflows
-from datetime import date
+from datetime import datetime
 
 @click.command()
 @click.option('--dir_downloads', required=True, type=str, help='Path where the downloaded ERA5 and SEAS5 data is stored',)
 @click.option('--output_dir', required=True, type=str, help='Path to store the convert forcing files',)
+@click.option('--date_string', required=True, type=str, help='String with year and month of current month (in YYYY_MM format)',)
 
 # Optional settings
 @click.option('--wflow_staticmaps_file', default="wflow_rhine/staticmaps.nc",
@@ -25,7 +26,7 @@ from datetime import date
 @click.option('--lapse_rate', default=-0.0065, 
               type=float, help='Lapse rate for temperature correction')
 
-def convert_data(dir_downloads, wflow_staticmaps_file, era5_dem_file,
+def convert_data(dir_downloads, date_string, wflow_staticmaps_file, era5_dem_file,
                  seas5_dem_file, lapse_rate, output_dir):
     
     # Prepare logger
@@ -34,7 +35,7 @@ def convert_data(dir_downloads, wflow_staticmaps_file, era5_dem_file,
     
     
     # Get current date, for month and year information
-    current_date = date.today()
+    current_date = datetime.strptime(date_string, '%Y_%m').date()
     current_month = current_date.month
     current_year = current_date.year
     

@@ -7,14 +7,15 @@ Created on Fri Oct 29 14:25:36 2021
 import os
 import click
 import cdsapi
-from datetime import date
+from datetime import datetime
 
 @click.command()
 @click.option('--output_dir', required=True, type=str, help='Output directory for downloaded NetCDF files',)
-def download_forcing(output_dir):
+@click.option('--date_string', required=True, type=str, help='String with year and month of current month (in YYYY_MM format)',)
+def download_forcing(output_dir, date_string):
     
-    # Get current date, for month and year information
-    current_date = date.today()
+    # Get current date, for month and year information    
+    current_date = datetime.strptime(date_string, '%Y_%m').date()
     current_month = current_date.month
     current_year = current_date.year
     
