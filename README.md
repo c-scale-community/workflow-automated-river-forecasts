@@ -63,114 +63,6 @@ python plot_wflow_results.py --path_to_main_dir "../../" --filename_figure "disc
 `--filename_figure` is the filename of the resulting figure (including figure format), which will be saved in the `Public` folder.
 
 ## Folder structure
-
-### Current structure
-```bash
-.
-├── Data
-│   ├── ERA5_2021_10.nc
-│   ├── ERA5_2021_12.nc
-│   ├── input
-│   │   ├── orography_era5_rhine.grib
-│   │   ├── orography_seas5_rhine.grib
-│   │   └── staticmaps.nc
-│   ├── model
-│   │   ├── forcing_ERA5_2021-12-01_2021-12-31.nc
-│   │   ├── forcing_SEAS5_ens0_2022-01-01_2022-08-02.nc
-│   │   ├── forcing_SEAS5_ens1_2022-01-01_2022-08-02.nc
-│   │   ├── forcing_SEAS5_ens2_2022-01-01_2022-08-02.nc
-│   │   └── ....
-│   ├── model_output
-│   │   └── era5
-│   │       ├── output.csv
-│   │       └── outstates.nc
-│   ├── SEAS5_2021_11.nc
-│   ├── SEAS5_2022_1.nc
-│   └── upper_androscoggin
-│       ├── inmaps.nc
-│       ├── runwflow.jl
-│       ├── sbm_simple.toml
-│       └── staticmaps.nc
-├── Public
-│   └── test.txt
-├── Share
-│   └── ...
-└── Software
-    ├── cdsapirc.txt
-    ├── images
-    │   ├── hrlsa_j.sif
-    │   ├── hrlsa.sif
-    │   ├── wflow_v0_4_0.sif
-    │   └── wflow_wflowjulia.sif
-    ├── python
-    │   ├── convert_data.py
-    │   └── download_data.py
-    ├── scripts
-    │   ├── prepare_data.sh
-    │   ├── prepare.sh
-    │   ├── run_wflow.sh
-    │   └── wflow.sh
-    ├── slurm-972046.out
-    ├── slurm-972127.out
-    ├── slurm-972157.out
-    ├── slurm-972170.out
-    ├── slurm-983637.out
-    ├── slurm-983638.out
-    ├── slurm-983656.out
-    ├── slurm-983744.out
-    ├── slurm-983745.out
-    ├── slurm-984000.out
-    ├── slurm-984001.out
-    ├── slurm-984002.out
-    ├── slurm-984003.out
-    └── wflow
-        └── wflow_rhine
-            ├── forcing.nc
-            ├── hydromt_data.yml
-            ├── hydromt.log
-            ├── inmaps-era5-2020.nc
-            ├── instate
-            ├── lake_hq_1244.csv
-            ├── lake_hq_1248.csv
-            ├── lake_hq_14005.csv
-            ├── lake_hq_14023.csv
-            ├── lake_hq_14029.csv
-            ├── lake_sh_1243.csv
-            ├── lake_sh_1244.csv
-            ├── run_era
-            ├── run_wflow.jl
-            ├── staticgeoms
-            │   ├── basins.geojson
-            │   ├── gauges.geojson
-            │   ├── gauges_grdc.geojson
-            │   ├── gauges_wflow-gauges-extra.geojson
-            │   ├── gauges_wflow-gauges-mainsub.geojson
-            │   ├── gauges_wflow-gauges-rhineriv.geojson
-            │   ├── glaciers.geojson
-            │   ├── lakes.geojson
-            │   ├── lakes_update.geojson
-            │   ├── region.geojson
-            │   ├── reservoirs.geojson
-            │   ├── rivers.geojson
-            │   ├── selected_grdc
-            │   │   ├── selected_grdc_01.cpg
-            │   │   ├── selected_grdc_01.dbf
-            │   │   ├── selected_grdc_01.prj
-            │   │   ├── selected_grdc_01.shp
-            │   │   └── selected_grdc_01.shx
-            │   ├── subcatch_grdc.geojson
-            │   ├── subcatch_wflow-gauges-extra.geojson
-            │   ├── subcatch_wflow-gauges-mainsub.geojson
-            │   └── subcatch_wflow-gauges-rhineriv.geojson
-            ├── staticmaps.nc
-            ├── wflow_sbm_era.toml
-            ├── wflow_sbm_seas.toml
-            └── wflow_sbm.toml
-```
-
-
-
-### Proposed structure
 ```bash
 .
 ├── Data
@@ -214,6 +106,7 @@ python plot_wflow_results.py --path_to_main_dir "../../" --filename_figure "disc
 │   │   ├── downloaded                                          # To store files created by download_data.py 
 │   │   │   ├── ERA5_2021_12.nc
 │   │   │   └── SEAS5_2022_1.nc
+│   │   │   └── ...
 │   │   └── converted                                           # To store files created by convert_data.py, also required to run wflow
 │   │   │   ├── forcing_ERA5_2021-12-01_2021-12-31.nc
 │   │   │   ├── forcing_SEAS5_ens0_2022-01-01_2022-08-02.nc
@@ -243,14 +136,13 @@ python plot_wflow_results.py --path_to_main_dir "../../" --filename_figure "disc
 ├── Public                                                      # Directory to store output (figures/processed model output) in, accessible from "outside"
 │   └── test.txt
 ├── Share
-│   └── ...
+│   └── home
+|   │   ├── .cdsapirc                                           # needed to authenticate with the server
 └── Software
     ├── cdsapirc.txt
     ├── images
     │   ├── hrlsa_j.sif
-    │   ├── hrlsa.sif
-    │   ├── wflow_v0_4_0.sif
-    │   └── wflow_wflowjulia.sif
+    │   └── wflowjulia.sif
     ├── python
     │   ├── convert_data.py
     │   └── download_data.py
@@ -259,17 +151,4 @@ python plot_wflow_results.py --path_to_main_dir "../../" --filename_figure "disc
     │   ├── prepare.sh
     │   ├── run_wflow.sh
     │   └── wflow.sh
-    ├── slurm-972046.out
-    ├── slurm-972127.out
-    ├── slurm-972157.out
-    ├── slurm-972170.out
-    ├── slurm-983637.out
-    ├── slurm-983638.out
-    ├── slurm-983656.out
-    ├── slurm-983744.out
-    ├── slurm-983745.out
-    ├── slurm-984000.out
-    ├── slurm-984001.out
-    ├── slurm-984002.out
-    └── slurm-984003.out
 ```    
