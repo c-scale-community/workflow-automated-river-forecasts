@@ -1,5 +1,4 @@
 #!/bin/bash
-#!/bin/bash
 #
 #SBATCH --job-name=prepare
 #SBATCH --output=/project/hrlsa/Data/logs/prepare.log

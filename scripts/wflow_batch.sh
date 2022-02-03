@@ -26,7 +26,7 @@ c_fname="forcing/converted"
 forcing_name=$(ls $project_home/Data/$c_fname | grep forcing_SEAS5_ens${SLURM_ARRAY_TASK_ID}_`echo $1 | sed 's/_/-/g'`)
 
 # create output dir if not exists
-mkdir -p -m775 $output_dir
+mkdir -p -m770 $output_dir
 
 # Run Wflow
 srun --nodes 1 --ntasks 1 singularity exec \

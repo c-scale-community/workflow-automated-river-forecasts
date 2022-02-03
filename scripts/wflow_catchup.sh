@@ -21,7 +21,7 @@ c_fname="forcing/converted"
 forcing_name=$(ls $project_home/Data/$c_fname | grep forcing_ERA5_`echo $1 | sed 's/_/-/g'`)
 
 # Create output directory if needed
-mkdir -p -m775 $output_dir
+mkdir -p -m770 $output_dir
 
 # Run Wflow
 srun --nodes 1 --ntasks 1 singularity exec \
