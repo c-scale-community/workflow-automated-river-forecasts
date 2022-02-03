@@ -17,7 +17,7 @@ output_dir=$project_home/Data/model_output
 figure_out_dir=$project_home/Public/$1
 
 # Create figure out directory if needed
-mkdir -p -m774 $figure_out_dir
+mkdir -p -m775 $figure_out_dir
 
 # Run plotting
 srun --nodes 1 --ntasks 1 singularity exec \
@@ -31,4 +31,5 @@ srun --nodes 1 --ntasks 1 singularity exec \
 	--figure_out_dir /tempout \
 	--filename_figure discharge_ts.png \
 	--num_ensembles 51 \
-	--col_extract Q_1
+	--col_extract Q_1 \
+	--start_date $1

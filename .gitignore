@@ -1,2 +1,4 @@
 **/*.sif
 .python-version
+old/*
+wflow/*
