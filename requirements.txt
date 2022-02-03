@@ -3,3 +3,4 @@ cdsapi
 numpy
 xarray
 hydromt
+matplotlib
