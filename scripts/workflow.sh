@@ -12,5 +12,7 @@ echo "started data prep job with id: $preparejobid"
 catchupjobid=$(sbatch --dependency=afterok:$preparejobid wflow_catchup.sh $lastym $last2ym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
 echo "stated catchup job with id: $catchupjobid"
 # Forecast
-forecastjobid=$(sbatch --dependency=afterok:$catchupjobid wflow_batch.sh $thisym $lastym)
+forecastjobid=$(sbatch --dependency=afterok:$catchupjobid wflow_batch.sh $thisym $lastym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
 echo "started forecasting job with id: $forecastjobid"
+# Plotting
+sbatch --dependency=afterok:$forecastjobid plotting.sh $thisym
