@@ -84,7 +84,7 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
             seas_result.columns = [ens_idx]
         # Append to existing dataframe    
         else:
-            seas_result[ens_idx] = pd.read_csv(path_to_era_output, index_col=0, parse_dates=True)[col_extract]
+            seas_result[ens_idx] = pd.read_csv(path_to_seas_output, index_col=0, parse_dates=True)[col_extract]
     
     # Create figure
     fig = plt.figure("Plot_discharge", clear=True, tight_layout=True, figsize=(8,5))
