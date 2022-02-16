@@ -1,18 +1,22 @@
 # Runs the hrlsa workflow as one script, based on current month
 
+scriptsdir="/project/hrlsa/Software/scripts"
+
 d=$(date)
 thisym=$(date "+%Y_%m")
 lastym=$(date --date "$d -1 month" "+%Y_%m") 
 last2ym=$(date --date "$d -2 month" "+%Y_%m")
 
 # Download and convert data
-preparejobid=$(sbatch prepare.sh $thisym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
+preparejobid=$(sbatch $scriptsdir/prepare.sh $thisym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
 echo "started data prep job with id: $preparejobid"
 # Catch up with real data
-catchupjobid=$(sbatch --dependency=afterok:$preparejobid wflow_catchup.sh $lastym $last2ym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
-echo "stated catchup job with id: $catchupjobid"
+catchupjobid=$(sbatch --dependency=afterok:$preparejobid $scriptsdir/wflow_catchup.sh $lastym $last2ym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
+echo "started catchup job with id: $catchupjobid"
 # Forecast
-forecastjobid=$(sbatch --dependency=afterok:$catchupjobid wflow_batch.sh $thisym $lastym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
+forecastjobid=$(sbatch --dependency=afterok:$catchupjobid $scriptsdir/wflow_batch.sh $thisym $lastym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
 echo "started forecasting job with id: $forecastjobid"
 # Plotting
-sbatch --dependency=afterok:$forecastjobid plotting.sh $thisym
+plottingjobid=$(sbatch --dependency=afterok:$forecastjobid $scriptsdir/plotting.sh $thisym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
+echo "started plotting job with id: $plottingjobid"
+
