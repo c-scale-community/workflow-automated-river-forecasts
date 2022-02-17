@@ -142,7 +142,7 @@ def convert_era5(filename, dem_model, dem_forcing, output_dir,
 
     # Convert correct units
     t2m = era.t2m - 273.15
-    tp = era.tp * 1000
+    tp = era.tp * 1000 * 24
     msl = era.msl
     ssrd = era.ssrd / 86400
     
