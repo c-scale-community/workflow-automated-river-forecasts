@@ -6,6 +6,7 @@ Created on Fri Oct 29 14:25:36 2021
 
 import os
 import click
+import hydromt
 import cdsapi
 import xarray as xr
 from datetime import datetime
@@ -20,7 +21,7 @@ from datetime import datetime
 
 # Optional settings
 @click.option('--buffer', default=0.5,
-              type=float, help='Buffer around model domain to ensure region for ERA5 and SEAS5 downloads')
+              type=float, help='Buffer around model domain to ensure region for ERA5 and SEAS5 downloads, in degrees')
 def download_forcing(output_dir, date_string, staticmaps_fn, buffer):
 
     # Get current date, for month and year information
@@ -37,45 +38,44 @@ def download_forcing(output_dir, date_string, staticmaps_fn, buffer):
         prev_year = current_year - 1
 
     # Extract area from model input
-    area = get_area_from_staticmaps(staticmaps_fn=staticmaps_fn, buffer=buffer)
+    area_str, area_list = get_area_from_staticmaps(staticmaps_fn=staticmaps_fn, buffer=buffer)
 
     # Download orography files (sliced to the required area)
-    download_era5_orography(output=output_dir, area=area)
-    download_seas5_orography(output=output_dir, area=area)
+    download_era5_orography(output=output_dir, area=area_list)
+    download_seas5_orography(output=output_dir, area=area_list)
 
     # Download ERA5 data
-    download_era5(month=prev_month, year=prev_year, output=output_dir, area=area)
+    download_era5(month=prev_month, year=prev_year, output=output_dir, area=area_str)
     # Download SEAS5 data
-    download_seas5(month=current_month, year=current_year, output=output_dir, area=area)
+    download_seas5(month=current_month, year=current_year, output=output_dir, area=area_str)
 
 
 def get_area_from_staticmaps(staticmaps_fn, buffer):
-    # Default/common names to for the x and y dimensions, in order to extract
-    # model domain from
-    XDIMS = ("x", "longitude", "lon", "long")
-    YDIMS = ("y", "latitude", "lat")
+
     # Read staticmaps file
     staticmaps = xr.open_dataset(staticmaps_fn)
 
-    # Find the right dimension name for the x and y dimensions
-    for xdim in XDIMS:
-        if xdim in staticmaps.coords.keys():
-            xname = xdim
-    for ydim in YDIMS:
-        if ydim in staticmaps.coords.keys():
-            yname = ydim
+    # Get the bounding box of the staticmaps
+    xmin, ymin, xmax, ymax = staticmaps.raster.box.loc[0, "geometry"].bounds
     # Determine the bounding box, and apply a buffer to ensure that the downloaded
     # data is big enough for the model domain
-    xmin = min(staticmaps[xname].values) - buffer
-    xmax = max(staticmaps[xname].values) + buffer
-    ymin = min(staticmaps[yname].values) - buffer
-    ymax = max(staticmaps[yname].values) + buffer
+    xmin = xmin - buffer
+    xmax = xmax + buffer
+    ymin = ymin - buffer
+    ymax = ymax + buffer
+
+    # Round to nearest 0.5 value
+    xmin = float(round((xmin*2))/2)
+    xmax = float(round((xmax*2))/2)
+    ymin = float(round((ymin*2))/2)
+    ymax = float(round((ymax*2))/2)
 
     # Set the bounding box to the correct format, such that it can be used by
     # the ERA5 and SEAS5 download scripts
-    area_fmt = f"{ymin:.2f}/{xmin:.2f}/{ymax:.2f}/{xmax:.2f}"
+    area_str = f"{ymin:.2f}/{xmin:.2f}/{ymax:.2f}/{xmax:.2f}"
+    area_list = [ymin, xmin, ymax, xmax]
 
-    return area_fmt
+    return area_str, area_list
 
 
 def download_era5_orography(output, area):
@@ -345,7 +345,15 @@ def download_seas5(month, year, output, area):
 
 
 if __name__ == '__main__':
-    download_forcing()
+    output_dir = r"c:\Users\buitink\Documents\Projects\cscale\testing\downloads\\"
+    date_string = "2022_04"
+    staticmaps_fn = r"c:\Users\buitink\Documents\Projects\cscale\wflow_rhine\staticmaps.nc"
+    buffer = 0.5
+    download_forcing(output_dir=output_dir,
+                     date_string=date_string,
+                     staticmaps_fn=staticmaps_fn,
+                     buffer=0.5)
+
     # Old area rhine: '46.00/5.00/52.50/12.50'
     # download_era5(month=2, year=2022, output="workdir")
     # download_seas5(month=2, year=2022, output="workdir")
