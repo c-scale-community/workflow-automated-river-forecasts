@@ -12,18 +12,22 @@ rsync -W -e "ssh -i <<your private key>>" hrlsa.sif <<your surf email>>@spider.s
 * `convert_data.py` functionality to convert downloaded data into suitable forcing input for a `wflow_sbm` model
 
 ## Usage
-1. Firstly, download the ERA5 and SEAS5 data from the Climate Data Store. The script automatically downloads SEAS5 
-data of the current month, and ERA5 data of the previous month. '--output_dir' sets the directory where the downloaded 
-files are stored.
+1. Firstly, download the ERA5 and SEAS5 data from the Climate Data Store. ERA5 files are dowloaded upto the provided date,
+and the SEAS5 forecasts are downloaded starting from the provided date. The script requires the following input parameters:
+`--output_dir` sets the directory where the downloaded files are stored, `--date_string` expects a string (YYYY_MM) of the 
+current month, `--staticmaps_fn` expects the path to the file containing the staticmaps input of the Wflow model (used to 
+set the bounding box for the ERA5 and SEAS5 downloads.
 ```
-python download_data.py --output_dir "workdir"
+python download_data.py --output_dir "workdir" --date_string "2022_01" --staticmaps_fn "../../Data/Model_input/staticmaps.nc"
 ```
-2. Resample the downloaded data to the model grid. 
-`--dir_downloads` refers to the directory with the downloaded data ('--output_dir' from the previous script), 
-and `--output_dir` to the directory where the forcing files are exported to (currently set to the `wflow` model directory). 
-See the script for the optional settings (location of model maps, ERA5 and SEAS5 elevation maps, and lapse rate value).
+
+2. Resample the downloaded data to the model grid. The script requires the following input parameters:
+`--dir_downloads` refers to the directory with the downloaded data ('--output_dir' from the previous script), and 
+`--output_dir` to the directory where the forcing files are exported to (currently set to the `wflow` model directory). 
+`--date_string` expects a string (YYYY_MM) of the current month. See the script for the optional settings (location of model 
+maps, ERA5 and SEAS5 elevation maps, and lapse rate value).
 ```
-python convert_data.py --dir_downloads "workdir" --output_dir "wflow_rhine"
+python convert_data.py --dir_downloads "workdir" --output_dir "wflow_rhine" --date_string "2022_01"
 ```
 
 3. Run the wflow model with the new forcing, both for ERA5 and SEAS5 data. Model runs need to be performed every month, where 

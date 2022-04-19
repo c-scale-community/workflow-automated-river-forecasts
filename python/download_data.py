@@ -345,14 +345,17 @@ def download_seas5(month, year, output, area):
 
 
 if __name__ == '__main__':
-    output_dir = r"c:\Users\buitink\Documents\Projects\cscale\testing\downloads\\"
-    date_string = "2022_04"
-    staticmaps_fn = r"c:\Users\buitink\Documents\Projects\cscale\wflow_rhine\staticmaps.nc"
-    buffer = 0.5
-    download_forcing(output_dir=output_dir,
-                     date_string=date_string,
-                     staticmaps_fn=staticmaps_fn,
-                     buffer=0.5)
+    download_forcing()
+
+    # LOCAL TESTING
+    # output_dir = r"c:\Users\buitink\Documents\Projects\cscale\testing\downloads\\"
+    # date_string = "2022_04"
+    # staticmaps_fn = r"c:\Users\buitink\Documents\Projects\cscale\wflow_rhine\staticmaps.nc"
+    # buffer = 0.5
+    # download_forcing(output_dir=output_dir,
+    #                  date_string=date_string,
+    #                  staticmaps_fn=staticmaps_fn,
+    #                  buffer=0.5)
 
     # Old area rhine: '46.00/5.00/52.50/12.50'
     # download_era5(month=2, year=2022, output="workdir")

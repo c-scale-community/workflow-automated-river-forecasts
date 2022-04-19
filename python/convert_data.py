@@ -273,16 +273,16 @@ def convert_seas5(filename, dem_model, dem_forcing, output_dir, log,
         idx += 1
 
 if __name__ == "__main__":
+    convert_data()
 
+    # LOCAL TESTING
+    # dir_downloads = r"c:\Users\buitink\Documents\Projects\cscale\testing\downloads\\"
+    # date_string = "2022_04"
+    # wflow_staticmaps_file = r"c:\Users\buitink\Documents\Projects\cscale\wflow_rhine\staticmaps.nc"
+    # era5_dem_file = r"c:\Users\buitink\Documents\Projects\cscale\testing\downloads\orography_era5.grib"
+    # seas5_dem_file = r"c:\Users\buitink\Documents\Projects\cscale\testing\downloads\orography_seas5.grib"
+    # lapse_rate = -0.0065
+    # output_dir = r"c:\Users\buitink\Documents\Projects\cscale\testing\converted\\"
 
-
-    dir_downloads = r"c:\Users\buitink\Documents\Projects\cscale\testing\downloads\\"
-    date_string = "2022_04"
-    wflow_staticmaps_file = r"c:\Users\buitink\Documents\Projects\cscale\wflow_rhine\staticmaps.nc"
-    era5_dem_file = r"c:\Users\buitink\Documents\Projects\cscale\testing\downloads\orography_era5.grib"
-    seas5_dem_file = r"c:\Users\buitink\Documents\Projects\cscale\testing\downloads\orography_seas5.grib"
-    lapse_rate = -0.0065
-    output_dir = r"c:\Users\buitink\Documents\Projects\cscale\testing\converted\\"
-
-    convert_data(dir_downloads, date_string, wflow_staticmaps_file, era5_dem_file,
-                     seas5_dem_file, lapse_rate, output_dir)
+    # convert_data(dir_downloads, date_string, wflow_staticmaps_file, era5_dem_file,
+    #                  seas5_dem_file, lapse_rate, output_dir)
