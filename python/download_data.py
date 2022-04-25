@@ -56,13 +56,13 @@ def get_area_from_staticmaps(staticmaps_fn, buffer):
     staticmaps = xr.open_dataset(staticmaps_fn)
 
     # Get the bounding box of the staticmaps
-    xmin, ymin, xmax, ymax = staticmaps.raster.box.loc[0, "geometry"].bounds
+    bbox = staticmaps.raster.box.bounds.loc[0]
     # Determine the bounding box, and apply a buffer to ensure that the downloaded
     # data is big enough for the model domain
-    xmin = xmin - buffer
-    xmax = xmax + buffer
-    ymin = ymin - buffer
-    ymax = ymax + buffer
+    xmin = bbox["minx"] - buffer
+    xmax = bbox["maxx"] + buffer
+    ymin = bbox["miny"] - buffer
+    ymax = bbox["maxy"] + buffer
 
     # Round to nearest 0.5 value
     xmin = float(round((xmin*2))/2)
