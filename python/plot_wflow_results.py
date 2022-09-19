@@ -93,8 +93,6 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
     # Extract date information
     xdate_era = era_result.index.to_pydatetime()
     xdate_seas = seas_result.index.to_pydatetime()
-    print(xdate_era)
-    print(xdate_seas)
 
     ax.plot(xdate_era, era_result, color="black")
     for ens_idx in range(num_ensembles):
@@ -104,7 +102,7 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
     ax.set_ylabel("Discharge [m$^3$ s$^{-1}$]")
 
     # Format xdate
-    months = mdates.MonthLocator(bymonthday=15)
+    months = mdates.MonthLocator(bymonthday=2)
     ax.xaxis.set_major_locator(months)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
@@ -141,7 +139,7 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
     ax.set_ylabel("Discharge [m$^3$ s$^{-1}$]")
 
     # Format xdate
-    months = mdates.MonthLocator(bymonthday=15)
+    months = mdates.MonthLocator(bymonthday=2)
     ax.xaxis.set_major_locator(months)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
