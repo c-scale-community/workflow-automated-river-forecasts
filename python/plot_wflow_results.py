@@ -99,7 +99,7 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
 
     ax.set_ylabel("Discharge [m$^3$ s$^{-1}$]")
 
-    fig.savefig(f"{figure_out_dir}/{filename_figure}_orig", dpi=300)
+    fig.savefig(f"{figure_out_dir}/orig_{filename_figure}", dpi=300)
 
 
     # Calculate quantiles for SEAS5 results
