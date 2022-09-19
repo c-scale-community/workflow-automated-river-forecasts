@@ -7,64 +7,97 @@ rsync -W -e "ssh -i <<your private key>>" hrlsa.sif <<your surf email>>@spider.s
 ```
 ## File explanation
 
+### Bash scripts
+The bash scripts are used to define and run the several steps in the workflow. Each step
+consists of a separate bash script, which calls the relevant python script (or Wflow
+executable). The `workflow.sh` contains all steps and does not require specific user input, as
+the date is automatically retrieved (ensuring all input and output settings are correct). The
+following bash scripts called by the `workflow.sh` script:
+* `prepare.sh` takes care of downloading ERA5 and SEAS5 data, and converts the downloaded file
+  into Wflow import (see `download_data.py` and `convert_data.py` below)
+* `wflow_catchup.sh` runs the Wflow model for the most recent month with ERA5 data
+* `wflow_batch.sh` runs the Wflow model for the 50 ensembles of the SEAS5 forecasts
+* `plotting.sh` plots the results of the model simulations (see `plot_wflow_results.sh`)
 
-* `download_data.py` functionality to download ERA5 and SEAS5 data using the CDS API ([note that a key-file is required](https://cds.climate.copernicus.eu/api-how-to))
-* `convert_data.py` functionality to convert downloaded data into suitable forcing input for a `wflow_sbm` model
+### Python scripts
+* `download_data.py` functionality to download ERA5 and SEAS5 data using the CDS API ([note
+  that a key-file is required](https://cds.climate.copernicus.eu/api-how-to))
+* `convert_data.py` functionality to convert downloaded data into suitable forcing input for a
+  `wflow_sbm` model
+* `plot_wflow_results.py` functionality to convert simulation results into a figure showing the
+  last month of discharge, together with the forecasted discharge.
+
 
 ## Usage
-1. Firstly, download the ERA5 and SEAS5 data from the Climate Data Store. ERA5 files are dowloaded upto the provided date,
-and the SEAS5 forecasts are downloaded starting from the provided date. The script requires the following input parameters:
-`--output_dir` sets the directory where the downloaded files are stored, `--date_string` expects a string (YYYY_MM) of the 
-current month, `--staticmaps_fn` expects the path to the file containing the staticmaps input of the Wflow model (used to 
-set the bounding box for the ERA5 and SEAS5 downloads.
+1. Firstly, download the ERA5 and SEAS5 data from the Climate Data Store. ERA5 files are
+downloaded upto the provided date, and the SEAS5 forecasts are downloaded starting from the
+provided date. The script requires the following input parameters: `--output_dir` sets the
+directory where the downloaded files are stored, `--date_string` expects a string (YYYY_MM) of
+the current month, `--staticmaps_fn` expects the path to the file containing the staticmaps
+input of the Wflow model (used to set the bounding box for the ERA5 and SEAS5 downloads,
+`--buffer` can be defined to specify a buffer value (in degrees) around the bounding box, to
+ensure the area of interest is fully covered.
 ```
-python download_data.py --output_dir "workdir" --date_string "2022_01" --staticmaps_fn "../../Data/Model_input/staticmaps.nc"
+python download_data.py --output_dir "workdir" --date_string "2022_01" --staticmaps_fn "../../Data/Model_input/staticmaps.nc" --buffer 0.5
 ```
 
-2. Resample the downloaded data to the model grid. The script requires the following input parameters:
-`--dir_downloads` refers to the directory with the downloaded data ('--output_dir' from the previous script), and 
-`--output_dir` to the directory where the forcing files are exported to (currently set to the `wflow` model directory). 
-`--date_string` expects a string (YYYY_MM) of the current month. See the script for the optional settings (location of model 
-maps, ERA5 and SEAS5 elevation maps, and lapse rate value).
+2. Resample the downloaded data to the model grid. The script requires the following input
+parameters: `--dir_downloads` refers to the directory with the downloaded data ('--output_dir'
+from the previous script), and `--output_dir` to the directory where the forcing files are
+exported to (currently set to the `wflow` model directory). `--date_string` expects a string
+(YYYY_MM) of the current month. See the script for the optional settings (location of model
+maps, ERA5 and SEAS5 elevation maps, and lapse rate value). Other options
+(`--wflow_staticmaps_file`, `--era5_dem_file`, and `--era5_dem_file`) refer to elevation maps
+in order to correctly apply a lapse rate (`--lapse_rate`) to the temperature. Note that the
+elevation map in the Wflow staticmaps is named `wflow_dem`. The orography files for ERA5 and
+SEAS5 are downloaded automatically.
 ```
 python convert_data.py --dir_downloads "workdir" --output_dir "wflow_rhine" --date_string "2022_01"
 ```
 
-3. Run the wflow model with the new forcing, both for ERA5 and SEAS5 data. Model runs need to be performed every month, where 
-two types of runs can be identified: (1) catching up with observations from the "historical" period (ERA5), and performing
-simulations to cover the forecasted period (SEAS5). The SEAS5 data consists of 50 ensemble members, which cover the uncertainty
-range, and wflow needs to simulate each of these members. The following simulation types need to be performed every month (using the 
-trigger date of around 2022-01-15 as an example):
+3. Run the wflow model with the new forcing, both for ERA5 and SEAS5 data. Model runs need to
+be performed every month, where two types of runs can be identified: (1) catching up with
+observations from the "historical" period (ERA5), and performing simulations to cover the
+forecasted period (SEAS5). The SEAS5 data consists of 50 ensemble members, which cover the
+uncertainty range, and wflow needs to simulate each of these members. The following simulation
+types need to be performed every month (using the trigger date of around 2022-01-15 as an
+example):
  * wflow with ERA5 data, covering 2021-12-01 to 2021-12-31
- * wflow with SEAS5 data, which covers 2022-01-01 to 2022-08-02 (50 times, for each ensemble member)
+ * wflow with SEAS5 data, which covers 2022-01-01 to 2022-08-02 (50 times, for each ensemble
+   member)
 
-Both runs need to be initialized, such that the model starts with "warm" states. The wflow model outputs a "oustates.nc" file
-in the output directory of every simulation, which can be used to initialize a new simulation. Again using a trigger date of 
-around 2022-01-15 as an example, the following states need to be used to initialize the two simulation types
- * wflow+ERA5 data (2021-12): initialized with the outstates from the wflow+ERA5 simulation from the month before (2021-11)
- * wflow+SEAS5 data (2022-01): initialized with the outstates from the most recent wflow+ERA5 simulation (2021-12), same for 
- every ensemble member.
+Both runs need to be initialized, such that the model starts with "warm" states. The wflow
+model outputs a "oustates.nc" file in the output directory of every simulation, which can be
+used to initialize a new simulation. Again using a trigger date of around 2022-01-15 as an
+example, the following states need to be used to initialize the two simulation types
+ * wflow+ERA5 data (2021-12): initialized with the outstates from the wflow+ERA5 simulation
+   from the month before (2021-11)
+ * wflow+SEAS5 data (2022-01): initialized with the outstates from the most recent wflow+ERA5
+ simulation (2021-12), same for every ensemble member.
+
+The dates are extracted from the forcing files, such that the Wflow can be run with the same settings file (`wflow_sbm_static.toml`) for each simulation.
 
 Usage:
+```bash
+wflow_cli "wflow_sbm_static.toml"
 ```
-julia start_wflow.jl --toml_filename "wflow_sbm_base.toml" --output_dir "output_era/" --instates_filename "output_era/outstates.nc" --forcing_filename "data/forcing_ERA5_2021-12-01_2021-12-31.nc"
-```
-`--toml_filename` refers to the TOML file with the settings for wflow, the exact details for each run will be modified by this 
-script, `--instates_filename` to the location where the states are stored to initialize the model with, `--forcing_filename` to 
-the location where the forcing file is located (output from `convert_data.py`).
 
 4. Post processing to produce figures/accessible data
 
-Create a figure showing the results of the model output. Currently creates a .png file with the discharge timeseries: a
-single line for the ERA5 simulation of the previous months, and 50 timeseries for the SEAS5 simulations starting from the 
-current month to 7 months in the future.
+Create a figure showing the results of the model output. Currently creates a .png file with the
+discharge timeseries: a single line for the ERA5 simulation of the previous months, and the
+10-90 percentile values (specified with colored ranges) and the median value based on the
+ensemble SEAS5 simulations.
 
 Usage:
 ```
-python plot_wflow_results.py --path_to_main_dir "../../" --filename_figure "discharge_ts.png"
+python plot_wflow_results.py --output_dir "../../Data/model_output" --figure_out_dir "../../Public" --filename_figure "discharge_ts.png" --num_ensembles 51 --col_extract "Q_1" --start_date "2022_01"
 ```
-`--path_to_main_dir` refers to the path of the main folder, which contains the folders `Data`, `Public`, `Share`, and `Software`, 
-`--filename_figure` is the filename of the resulting figure (including figure format), which will be saved in the `Public` folder.
+`--output_dir` refers to the path of with the simulation results, `--filename_figure` is the
+filename of the resulting figure (including figure format), which will be saved in the folder
+specified by `--figure_out_dir`, `--num_ensembles` specifies the number of ensembles in SEAS5,
+`--col_extract` specifies which column in the Wflow output csv file needs to be extract, and
+`--start_date` the current month and year in YYYY_MM format.
 
 ## Folder structure
 ```bash
@@ -107,7 +140,7 @@ python plot_wflow_results.py --path_to_main_dir "../../" --filename_figure "disc
 │   │   ├── staticmaps.nc                                       # Also used by convert_data.py
 │   │   └── wflow_sbm_base.toml                                 # With baseline settings, details are adjusted by start_wflow.jl
 │   ├── Forcing
-│   │   ├── downloaded                                          # To store files created by download_data.py 
+│   │   ├── downloaded                                          # To store files created by download_data.py
 │   │   │   ├── ERA5_2021_12.nc
 │   │   │   └── SEAS5_2022_1.nc
 │   │   │   └── ...
@@ -155,4 +188,4 @@ python plot_wflow_results.py --path_to_main_dir "../../" --filename_figure "disc
     │   ├── prepare.sh
     │   ├── run_wflow.sh
     │   └── wflow.sh
-```    
+```
