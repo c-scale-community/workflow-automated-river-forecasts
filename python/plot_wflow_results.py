@@ -12,6 +12,7 @@ from dateutil.relativedelta import relativedelta
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import re
 
 
@@ -93,6 +94,7 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
     xdate_era = era_result.index.to_pydatetime()
     xdate_seas = seas_result.index.to_pydatetime()
     print(xdate_era)
+    print(xdate_seas)
 
     ax.plot(xdate_era, era_result, color="black")
     for ens_idx in range(num_ensembles):
@@ -100,6 +102,8 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
 
     ax.set_xlim(xdate_era[0], xdate_seas[-1])
     ax.set_ylabel("Discharge [m$^3$ s$^{-1}$]")
+
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
     fig.savefig(f"{figure_out_dir}/orig_{filename_figure}", dpi=300)
 
