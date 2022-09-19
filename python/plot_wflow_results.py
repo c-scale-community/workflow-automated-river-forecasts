@@ -69,12 +69,12 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
         else:
             return strmonth
 
-    path_to_era_output = f"{output_dir}/run_ERA5_{prev_year}_{month_to_str(prev_month)}/output.csv"
+    path_to_era_output = f"{output_dir}/run_ERA5_{prev_year}_{prev_month:02d}/output.csv"
     era_result = pd.read_csv(path_to_era_output, index_col=0, parse_dates=True)[col_extract]
 
     # Loop through the different ensemles
     for ens_idx in range(num_ensembles):
-        path_to_seas_output = f"{output_dir}/run_SEAS5_ens{ens_idx}_{current_year}_{month_to_str(current_month)}/output.csv"
+        path_to_seas_output = f"{output_dir}/run_SEAS5_ens{ens_idx}_{current_year}_{current_month:02d}/output.csv"
 
         # Loop through SEAS ensembles, create new dataframe if it is the first ensemble
         if ens_idx == 0:
@@ -92,11 +92,13 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
     # Extract date information
     xdate_era = era_result.index.to_pydatetime()
     xdate_seas = seas_result.index.to_pydatetime()
+    print(xdate_era)
 
     ax.plot(xdate_era, era_result, color="black")
     for ens_idx in range(num_ensembles):
         ax.plot(xdate_seas, seas_result[ens_idx], c="black", alpha=0.5)
 
+    ax.set_xlim(xdate_era[0], xdate_seas[-1])
     ax.set_ylabel("Discharge [m$^3$ s$^{-1}$]")
 
     fig.savefig(f"{figure_out_dir}/orig_{filename_figure}", dpi=300)
@@ -128,6 +130,7 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
     # Plot mean
     ax.plot(xdate_seas, seas_mean, ls="--", c="black")
 
+    ax.set_xlim(xdate_era[0], xdate_seas[-1])
     ax.set_ylabel("Discharge [m$^3$ s$^{-1}$]")
 
     fig.savefig(f"{figure_out_dir}/{filename_figure}", dpi=300)
