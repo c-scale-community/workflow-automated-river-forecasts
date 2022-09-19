@@ -105,9 +105,9 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
 
 
     # Format xdate
-    months = mdates.MonthLocator()
+    months = mdates.MonthLocator(bymonthday=1)
     ax.xaxis.set_major_locator(months)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
     fig.savefig(f"{figure_out_dir}/orig_{filename_figure}", dpi=300)
 
@@ -142,9 +142,9 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
     ax.set_ylabel("Discharge [m$^3$ s$^{-1}$]")
 
     # Format xdate
-    months = mdates.MonthLocator()
+    months = mdates.MonthLocator(bymonthday=1)
     ax.xaxis.set_major_locator(months)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
     fig.savefig(f"{figure_out_dir}/{filename_figure}", dpi=300)
 
