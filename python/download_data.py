@@ -9,6 +9,7 @@ import click
 import hydromt
 import cdsapi
 import xarray as xr
+from dateutil.relativedelta import relativedelta
 from datetime import datetime
 
 @click.command()
@@ -29,13 +30,10 @@ def download_forcing(output_dir, date_string, staticmaps_fn, buffer):
     current_month = current_date.month
     current_year = current_date.year
 
-    # Set correct previous month and year values for ERA5 data download
-    if current_month != 1:
-        prev_month = current_month - 1
-        prev_year = current_year
-    else:
-        prev_month = 12
-        prev_year = current_year - 1
+    previous_date = current_date - relativedelta(months=1)
+    prev_month = previous_date.month
+    prev_year = previous_date.year
+
 
     # Extract area from model input
     area_str, area_list = get_area_from_staticmaps(staticmaps_fn=staticmaps_fn, buffer=buffer)

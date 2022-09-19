@@ -8,6 +8,7 @@ import click
 import logging
 import numpy as np
 import xarray as xr
+from dateutil.relativedelta import relativedelta
 from hydromt import workflows
 from datetime import datetime
 
@@ -39,13 +40,10 @@ def convert_data(dir_downloads, date_string, wflow_staticmaps_file, era5_dem_fil
     current_month = current_date.month
     current_year = current_date.year
 
-    # Set correct previous month and year values for ERA5 data download
-    if current_month != 1:
-        prev_month = current_month - 1
-        prev_year = current_year
-    else:
-        prev_month = 12
-        prev_year = current_year - 1
+    previous_date = current_date - relativedelta(months=1)
+    prev_month = previous_date.month
+    prev_year = previous_date.year
+
 
     # Extract wflow model DEM from staticmaps
     dem_model = get_dem_model(staticmapfile = wflow_staticmaps_file)
