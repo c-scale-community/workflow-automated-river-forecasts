@@ -33,6 +33,6 @@ srun --nodes 1 --ntasks 1 singularity exec \
 	--date_string $1 \
       	--output_dir "/data/forcing/converted" \
        	--wflow_staticmaps_file "/data/model_input/staticmaps.nc" \
-       	--era5_dem_file "/data/forcing/orography_era5_rhine.grib" \
-       	--seas5_dem_file "/data/forcing/orography_seas5_rhine.grib"
+       	--era5_dem_file "/data/forcing/downloaded/orography_era5.grib" \
+       	--seas5_dem_file "/data/forcing/downloaded/orography_seas5.grib"
 
