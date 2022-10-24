@@ -40,7 +40,9 @@ def download_forcing(output_dir, date_string, staticmaps_fn, buffer):
 
     # Download orography files (sliced to the required area)
     download_era5_orography(output=output_dir, area=area_list)
-    download_seas5_orography(output=output_dir, area=area_list)
+    # TODO: temporarily disabled due to CDS backend changes, uncomment when this is done
+    # (should be in the week of 24-Oct-2022)
+    # download_seas5_orography(output=output_dir, area=area_list)
 
     # Download ERA5 data
     download_era5(month=prev_month, year=prev_year, output=output_dir, area=area_str)
