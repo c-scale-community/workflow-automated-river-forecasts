@@ -17,7 +17,10 @@ srun --nodes 1 --ntasks 1 singularity exec \
 	--bind $project_home/Software/python:/opt/python \
         -H $image_home:/home \
        	$image \
-	python /opt/python/download_data.py  --output_dir "/data/forcing/downloaded" --date_string $1
+	python /opt/python/download_data.py  \
+		--output_dir "/data/forcing/downloaded" \
+		--date_string $1 \
+		--staticmaps_fn "/data/model_input/staticmaps.nc"
 
 # Prepare Wflow input
 srun --nodes 1 --ntasks 1 singularity exec \

@@ -18,7 +18,7 @@ from datetime import datetime
 @click.option('--date_string', required=True, type=str,
               help='String with year and month of current month (in YYYY_MM format)',)
 @click.option('--staticmaps_fn', required=True, type=str,
-              help='Location to the staticmaps input filename, used to determine model extent',)
+              help='Path to the staticmaps file, used to determine model extent',)
 
 # Optional settings
 @click.option('--buffer', default=0.5,
