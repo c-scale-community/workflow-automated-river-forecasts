@@ -205,6 +205,7 @@ def convert_seas5(filename, dem_model, dem_forcing, output_dir, log,
         tmp_t2m = tmp.t2m - 273.15 # K to C
         tmp_ssrd = tmp_ssrd / 86400 # J m-2 to W m-2 (assuming J day-1)
         tmp_tp = tmp_tp * 1000 # m to mm
+        tmp_msl = tmp.msl * 0.01 # Pa to hPa
         # Remove negative values
         tmp_tp = tmp_tp.where(tmp_tp > 0, 0)
 
@@ -228,7 +229,7 @@ def convert_seas5(filename, dem_model, dem_forcing, output_dir, log,
         temperature.name = "t2m"
 
         # Prepare PET input file
-        petinput = tmp.msl.to_dataset()
+        petinput = tmp_msl.to_dataset()
         petinput = petinput.rename({"msl" : "press_msl"})
         petinput["kin"] = tmp_ssrd
         petinput = petinput.compute()
