@@ -5,7 +5,7 @@ scriptsdir="/project/hrlsa/Software/scripts"
 # d=$(date)
 tmp=${1-$(date)}
 d=$(date -d "$tmp")
-thisym=$(date "+%Y_%m")
+thisym=$(date --date "$d" "+%Y_%m")
 lastym=$(date --date "$d -1 month" "+%Y_%m")
 last2ym=$(date --date "$d -2 month" "+%Y_%m")
 
