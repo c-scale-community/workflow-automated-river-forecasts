@@ -54,7 +54,7 @@ def convert_data(dir_downloads, date_string, wflow_staticmaps_file, era5_dem_fil
     logging.info("Start converting of ERA5 dataset")
     convert_era5(filename=era5_file, dem_model=dem_model, dem_forcing=dem_era5,
                   lapse_rate=lapse_rate, crs=4326, output_dir=output_dir)
-    logging.info("Copmleted converting of ERA5 dataset")
+    logging.info("Completed converting of ERA5 dataset")
 
     # SEAS5 convert
     seas5_file = os.path.join(dir_downloads, f'SEAS5_{current_year}_{current_month}.nc')
@@ -62,7 +62,7 @@ def convert_data(dir_downloads, date_string, wflow_staticmaps_file, era5_dem_fil
     logging.info("Start converting of SEAS5 dataset")
     convert_seas5(filename=seas5_file, dem_model=dem_model, dem_forcing=dem_seas5,
                   lapse_rate=lapse_rate, crs=4326, output_dir=output_dir, log=logging)
-    logging.info("Copmleted converting of SEAS5 dataset")
+    logging.info("Completed converting of SEAS5 dataset")
 
 
 
