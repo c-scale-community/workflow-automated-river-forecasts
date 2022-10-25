@@ -1,6 +1,7 @@
 # Runs the hrlsa workflow as one script, based on current month
 
-scriptsdir="/project/hrlsa/Software/scripts"
+project_home=/project/hrlsa
+scriptsdir="$project_home/Software/scripts"
 
 # d=$(date)
 tmp=${1-$(date)}
