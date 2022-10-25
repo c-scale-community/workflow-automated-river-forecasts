@@ -117,7 +117,7 @@ def convert_era5(filename, dem_model, dem_forcing, output_dir,
     t2m = era.t2m - 273.15 # K to C
     tp = era.tp * 1000 * 24 # m/h to mm/day
     msl = era.msl * 0.01 # Pa to hPa
-    ssrd = era.ssrd / 86400 # J/m2 to W/m2
+    ssrd = era.ssrd / 3600 # J/m2 to W/m2
 
     # Apply lapse rate to temperature
     t_add_sea_level = temp_correction(dem_forcing)
