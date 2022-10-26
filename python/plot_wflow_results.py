@@ -135,6 +135,11 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
             y1=seas_quan.iloc[:,idx],
             y2=seas_quan.iloc[:,idx+1],
             color=colors[idx])
+    # connect era with seas data
+    ax.plot(
+        [xdate_era[-1], xdate_seas[0]],
+        [era_result.iloc[-1], seas_mean.iloc[0]], color="black")
+
     # Plot mean
     ax.plot(xdate_seas, seas_mean, ls="--", c="black", label="Mean SEAS5 ensemble")
 
@@ -146,7 +151,7 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
     ax.xaxis.set_major_locator(months)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
 
-        ## Add legend with custom colormap
+    ## Add legend with custom colormap
     cmap_name = f"Quantile range ({quantiles[0]}$-${quantiles[-1]})"
     cmap = LinearSegmentedColormap.from_list("custom", colors, N=len(colors))
     cmaps_dict = {cmap.name: cmap(np.linspace(0, 1, len(colors)))}
