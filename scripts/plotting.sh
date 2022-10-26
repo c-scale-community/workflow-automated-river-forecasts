@@ -21,6 +21,7 @@ mkdir -p -m775 $figure_out_dir
 
 # Copy html for easy viewing of figure
 cp $project_home/Software/assets/view_image.html $figure_out_dir/view_image.html
+chmod 664 $figure_out_dir/view_image.html
 
 # Run plotting
 srun --nodes 1 --ntasks 1 singularity exec \
