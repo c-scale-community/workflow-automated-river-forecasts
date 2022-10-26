@@ -139,7 +139,7 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
     ax.plot(xdate_seas, seas_mean, ls="--", c="black", label="Mean SEAS5 ensemble")
 
     ax.set_xlim(xdate_era[0], xdate_seas[-1])
-    ax.set_ylabel("Discharge [m$^3$ s$^{-1}$]")
+    ax.set_ylabel("Discharge [m$^3$ s$^{-1}$]", fontsize=11)
 
     # Format xdate
     months = mdates.MonthLocator(bymonthday=2)
@@ -164,7 +164,7 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
     ax.legend(
         handles=handles,
         labels=labels,
-        fontsize=12,
+        fontsize=11,
         loc=1,
         handler_map={list: HandlerTuple(ndivide=None, pad=0)}
         )
