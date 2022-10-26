@@ -19,6 +19,9 @@ figure_out_dir=$project_home/Public/$1
 # Create figure out directory if needed
 mkdir -p -m775 $figure_out_dir
 
+# Copy html for easy viewing of figure
+cp $project_home/Software/assests/view_image.html $figure_out_dir/view_image.html
+
 # Run plotting
 srun --nodes 1 --ntasks 1 singularity exec \
         --bind $output_dir:/tempdata \
