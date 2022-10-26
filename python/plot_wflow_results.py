@@ -163,11 +163,11 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
     labels.append(cmap_name)
     # Add legend to plot
     ax.legend(
-        handles=handles,
-        labels=labels,
-        fontsize=12,
-        loc=1,
-        handler_map={list: HandlerTuple(ndivide=None, pad=0)}
+        # handles=handles,
+        # labels=labels,
+        # fontsize=12,
+        # loc=1,
+        # handler_map={list: HandlerTuple(ndivide=None, pad=0)}
         )
 
     # save figure
