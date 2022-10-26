@@ -13,6 +13,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.patches as patches
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.legend_handler import HandlerTuple
 import re
 
 
@@ -124,7 +127,7 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
     xdate_era = era_result.index.to_pydatetime()
     xdate_seas = seas_result.index.to_pydatetime()
 
-    ax.plot(xdate_era, era_result, color="black")
+    ax.plot(xdate_era, era_result, color="black", label="ERA5 hindcast")
     # Plot quantiles
     for idx, q in enumerate(quantiles[:-1]):
         ax.fill_between(
@@ -133,7 +136,7 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
             y2=seas_quan.iloc[:,idx+1],
             color=colors[idx])
     # Plot mean
-    ax.plot(xdate_seas, seas_mean, ls="--", c="black")
+    ax.plot(xdate_seas, seas_mean, ls="--", c="black", label="Mean SEAS5 ensemble")
 
     ax.set_xlim(xdate_era[0], xdate_seas[-1])
     ax.set_ylabel("Discharge [m$^3$ s$^{-1}$]")
@@ -143,6 +146,31 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
     ax.xaxis.set_major_locator(months)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
 
+
+    ## Add legend with custom colormap
+    cmap_name = f"Quantile range ({quantiles[0]}$-${quantiles[-1]})"
+    cmap = LinearSegmentedColormap.from_list("custom", colors, N=len(colors))
+    cmaps_dict = {cmap.name: cmap(np.linspace(0, 1, len(colors)))}
+
+    cmap_colors = cmap(np.linspace(0, 1, len(colors)))
+    cmap_gradient = [patches.Patch(facecolor=c, edgecolor=c, label=cmap_name)
+                        for c in cmap_colors]
+
+    # Get current handles and labels
+    handles, labels = ax.get_legend_handles_labels()
+    # Append new info
+    handles.append([cmap_gradient])
+    labels.append(cmap_name)
+    # Add legend to plot
+    ax.legend(
+        handles=handles,
+        labels=labels,
+        fontsize=12,
+        loc=1,
+        handler_map={list: HandlerTuple(ndivide=None, pad=0)}
+        )
+
+    # save figure
     fig.savefig(f"{figure_out_dir}/{filename_figure}", dpi=300)
 
 
