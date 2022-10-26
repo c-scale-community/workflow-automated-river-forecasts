@@ -146,30 +146,28 @@ def plot_discharge_ts(output_dir, figure_out_dir, filename_figure, num_ensembles
     ax.xaxis.set_major_locator(months)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
 
-    print(ax.get_legend_handles_labels())
+        ## Add legend with custom colormap
+    cmap_name = f"Quantile range ({quantiles[0]}$-${quantiles[-1]})"
+    cmap = LinearSegmentedColormap.from_list("custom", colors, N=len(colors))
+    cmaps_dict = {cmap.name: cmap(np.linspace(0, 1, len(colors)))}
 
-    # ## Add legend with custom colormap
-    # cmap_name = f"Quantile range ({quantiles[0]}$-${quantiles[-1]})"
-    # cmap = LinearSegmentedColormap.from_list("custom", colors, N=len(colors))
-    # cmaps_dict = {cmap.name: cmap(np.linspace(0, 1, len(colors)))}
+    cmap_colors = cmap(np.linspace(0, 1, len(colors)))
+    cmap_gradient = [patches.Patch(facecolor=c, edgecolor=c, label=cmap_name)
+                        for c in cmap_colors]
 
-    # cmap_colors = cmap(np.linspace(0, 1, len(colors)))
-    # cmap_gradient = [patches.Patch(facecolor=c, edgecolor=c, label=cmap_name)
-    #                     for c in cmap_colors]
-
-    # # Get current handles and labels
-    # handles, labels = ax.get_legend_handles_labels()
-    # # Append new info
-    # handles.append([cmap_gradient])
-    # labels.append(cmap_name)
+    # Get current handles and labels
+    handles, labels = ax.get_legend_handles_labels()
+    # Append new info
+    handles.append([cmap_gradient])
+    labels.append(cmap_name)
     # Add legend to plot
-    ax.legend()
-        # handles=handles,
-        # labels=labels,
-        # fontsize=12,
-        # loc=1,
-        # handler_map={list: HandlerTuple(ndivide=None, pad=0)}
-        # )
+    ax.legend(
+        handles=handles,
+        labels=labels,
+        fontsize=12,
+        loc=1,
+        handler_map={list: HandlerTuple(ndivide=None, pad=0)}
+        )
 
     # save figure
     fig.savefig(f"{figure_out_dir}/{filename_figure}", dpi=300)
