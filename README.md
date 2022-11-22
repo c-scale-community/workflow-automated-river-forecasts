@@ -189,3 +189,11 @@ specified by `--figure_out_dir`, `--num_ensembles` specifies the number of ensem
     │   ├── run_wflow.sh
     │   └── wflow.sh
 ```
+
+
+## Notes
+
+From November 2022 a new version of ECMWF SEAS5 output substituted the old version. This new
+version (v5.1) will be labelled with the keyword `system=51`. See between the updates of 12
+October 2022 and 30 October 2022
+[here](https://confluence.ecmwf.int/display/CKB/Announcements).
