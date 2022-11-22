@@ -10,7 +10,7 @@ import hydromt
 import cdsapi
 import xarray as xr
 from dateutil.relativedelta import relativedelta
-from datetime import datetime
+import datetime
 
 @click.command()
 @click.option('--output_dir', required=True, type=str,
@@ -26,7 +26,7 @@ from datetime import datetime
 def download_forcing(output_dir, date_string, staticmaps_fn, buffer):
 
     # Get current date, for month and year information
-    current_date = datetime.strptime(date_string, '%Y_%m').date()
+    current_date = datetime.datetime.strptime(date_string, '%Y_%m').date()
     current_month = current_date.month
     current_year = current_date.year
 
@@ -40,9 +40,7 @@ def download_forcing(output_dir, date_string, staticmaps_fn, buffer):
 
     # Download orography files (sliced to the required area)
     download_era5_orography(output=output_dir, area=area_list)
-    # TODO: temporarily disabled due to CDS backend changes, uncomment when this is done
-    # (should be in the week of 24-Oct-2022)
-    # download_seas5_orography(output=output_dir, area=area_list)
+    download_seas5_orography(output=output_dir, area=area_list)
 
     # Download ERA5 data
     download_era5(month=prev_month, year=prev_year, output=output_dir, area=area_str)
@@ -170,6 +168,13 @@ def download_era5(month, year, output, area):
 
 def download_seas5(month, year, output, area):
     """Download SEAS5 data."""
+
+    # Check which system to use
+    current_date = datetime.date(year=year, month=month, day=1)
+    switch_date = datetime.date(year=2022, month=11, day=1)
+    system_switch_trigger = current_date >= switch_date
+    system = '51' if system_switch_trigger else '5'
+
     c = cdsapi.Client()
 
     filename = f'SEAS5_{year}_{month}.nc'
@@ -179,7 +184,7 @@ def download_seas5(month, year, output, area):
         'seasonal-original-single-levels',
         {
             'originating_centre':'ecmwf',
-            'system':'5',
+            'system': system,
             'variable': [
                 'mean_sea_level_pressure',
                 'surface_solar_radiation_downwards',
