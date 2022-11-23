@@ -1,3 +1,4 @@
+#!/bin/bash
 # Runs the hrlsa workflow as one script, based on current month
 
 project_home=/project/hrlsa
