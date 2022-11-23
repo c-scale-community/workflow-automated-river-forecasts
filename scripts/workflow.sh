@@ -1,4 +1,5 @@
 #!/bin/bash
+#SBATCH --job-name=workflow
 # Runs the hrlsa workflow as one script, based on current month
 
 project_home=/project/hrlsa
