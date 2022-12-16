@@ -1,111 +1,114 @@
-# use-case-high-res-land-surface-drought-analysis
-Porting and deploying the High Resolution Land Surface Drought Analysis use case to C-SCALE
+# Automated monthly river forecasts
 
-## Upload files to spider
-```
-rsync -W -e "ssh -i <<your private key>>" hrlsa.sif <<your surf email>>@spider.surfsara.nl:/project/hrlsa/<<target>>
-```
-## File explanation
+Easily deploy a workflow that produces a monthly high resolution, ensemble river discharge forecast for a river basin of interest.
 
-### Bash scripts
-The bash scripts are used to define and run the several steps in the workflow. Each step
-consists of a separate bash script, which calls the relevant python script (or Wflow
-executable). The `workflow.sh` contains all steps and does not require specific user input, as
-the date is automatically retrieved (ensuring all input and output settings are correct). The
-following bash scripts called by the `workflow.sh` script:
-* `prepare.sh` takes care of downloading ERA5 and SEAS5 data, and converts the downloaded file
-  into Wflow import (see `download_data.py` and `convert_data.py` below)
-* `wflow_catchup.sh` runs the Wflow model for the most recent month with ERA5 data
-* `wflow_batch.sh` runs the Wflow model for the 50 ensembles of the SEAS5 forecasts
-* `plotting.sh` plots the results of the model simulations (see `plot_wflow_results.sh`)
+This workflow produces a monthly high resolution, ensemble river discharge forecast for a river basin of interest. It build upon locally developed tools, and combines these in a workflow that is deployed in the cloud. The workflow uses the global ERA5 re-analysis product and SEAS5 seasonal meterological forecasts from the Copernicus Climate Data Store as input for the wflow_sbm hydrological model. The input data is automatically downloaded for the model domain, resampled to the required model grid, and runs a 50-member ensemble forecast simulation. This workflow is triggered every month when new SEAS5 forecasts become available.
 
-### Python scripts
-* `download_data.py` functionality to download ERA5 and SEAS5 data using the CDS API ([note
-  that a key-file is required](https://cds.climate.copernicus.eu/api-how-to))
-* `convert_data.py` functionality to convert downloaded data into suitable forcing input for a
-  `wflow_sbm` model
-* `plot_wflow_results.py` functionality to convert simulation results into a figure showing the
-  last month of discharge, together with the forecasted discharge.
+## Workflow steps
+As mentioned above, the workflow is triggered every month, at the moment when new SEAS5 forecasts become available. The SEAS5 data become available on the 13th day of the month, and provides a forecast to 7 months in the future. Therefore, this workflow is triggered on the 15th of every month. The following steps are automatically performed when the workflow is triggered (using November 15 2022 as the example trigger date):
 
+1. Download ERA5 data for the previous month (from 2022-10-01 until 2022-11-01)
+2. Download the most recent SEAS5 forecast data (from 2022-11-01 until 2023-06-01)
+3. Download orography information from both ERA5 and SEAS5, to allow for lapse-rate temperature correction
+3. Resample both ERA5 and SEAS5 data to the model grid (and apply a lapse rate to temperature)
+4. Run the wflow_sbm model with the ERA5 data to provide correct initial conditions for the SEAS5 forecast
+5. Run the wflow_sbm model with all members (50) of the SEAS5 forecast
+6. Plot discharge forecasts
 
-## Usage
-1. Firstly, download the ERA5 and SEAS5 data from the Climate Data Store. ERA5 files are
-downloaded upto the provided date, and the SEAS5 forecasts are downloaded starting from the
-provided date. The script requires the following input parameters: `--output_dir` sets the
-directory where the downloaded files are stored, `--date_string` expects a string (YYYY_MM) of
-the current month, `--staticmaps_fn` expects the path to the file containing the staticmaps
-input of the Wflow model (used to set the bounding box for the ERA5 and SEAS5 downloads,
-`--buffer` can be defined to specify a buffer value (in degrees) around the bounding box, to
-ensure the area of interest is fully covered.
-```
-python download_data.py --output_dir "workdir" --date_string "2022_01" --staticmaps_fn "../../Data/Model_input/staticmaps.nc" --buffer 0.5
-```
+## Script explanation
 
-2. Resample the downloaded data to the model grid. The script requires the following input
-parameters: `--dir_downloads` refers to the directory with the downloaded data ('--output_dir'
-from the previous script), and `--output_dir` to the directory where the forcing files are
-exported to (currently set to the `wflow` model directory). `--date_string` expects a string
-(YYYY_MM) of the current month. See the script for the optional settings (location of model
-maps, ERA5 and SEAS5 elevation maps, and lapse rate value). Other options
-(`--wflow_staticmaps_file`, `--era5_dem_file`, and `--era5_dem_file`) refer to elevation maps
-in order to correctly apply a lapse rate (`--lapse_rate`) to the temperature. Note that the
-elevation map in the Wflow staticmaps is named `wflow_dem`. The orography files for ERA5 and
-SEAS5 are downloaded automatically.
-```
-python convert_data.py --dir_downloads "workdir" --output_dir "wflow_rhine" --date_string "2022_01"
-```
+One main bash script orchestrates all steps in this workflow, with the arguments between brackets. The parameter **thisym** corresponds to the date set when curring `workflow.sh`, **lastym** one month before thisym, and **last2ym** two months before thisym.
 
-3. Run the wflow model with the new forcing, both for ERA5 and SEAS5 data. Model runs need to
-be performed every month, where two types of runs can be identified: (1) catching up with
-observations from the "historical" period (ERA5), and performing simulations to cover the
-forecasted period (SEAS5). The SEAS5 data consists of 50 ensemble members, which cover the
-uncertainty range, and wflow needs to simulate each of these members. The following simulation
-types need to be performed every month (using the trigger date of around 2022-01-15 as an
-example):
- * wflow with ERA5 data, covering 2021-12-01 to 2021-12-31
- * wflow with SEAS5 data, which covers 2022-01-01 to 2022-08-02 (50 times, for each ensemble
-   member)
+- `workflow.sh` (**date**, *optional in YYYY-MM-DD format*)
 
-Both runs need to be initialized, such that the model starts with "warm" states. The wflow
-model outputs a "oustates.nc" file in the output directory of every simulation, which can be
-used to initialize a new simulation. Again using a trigger date of around 2022-01-15 as an
-example, the following states need to be used to initialize the two simulation types
- * wflow+ERA5 data (2021-12): initialized with the outstates from the wflow+ERA5 simulation
-   from the month before (2021-11)
- * wflow+SEAS5 data (2022-01): initialized with the outstates from the most recent wflow+ERA5
- simulation (2021-12), same for every ensemble member.
+    This bash script orchestrates all steps in the workflow, ensuring they are executed in the correct order. This file can be run with and without any additional arguments. If run without any arguments, the current month is used as the start of the forecasting period. Additionally, it can be run with any date as argument (passed as `./workflow.sh "2022-10-15"`), in the case older forecasts need to be (re-)run. The script then runs the following four scripts in sequence, where the previous script needs to be completed before proceeding to the next step.
 
-The dates are extracted from the forcing files, such that the Wflow can be run with the same settings file (`wflow_sbm_static.toml`) for each simulation.
+    ```bash
+    ./workflow.sh # to run for the current month
+    ./workflow.sh "2022-11-15" # to run for any month
+    ```
 
-Usage:
-```bash
-wflow_cli "wflow_sbm_static.toml"
-```
+- `prepare.sh` (**thisym**, in *YYYY_MM* format)
 
-4. Post processing to produce figures/accessible data
+    This script downloads the ERA5 and SEAS5 data from the Copernicus Data Store, using the domain of the hydrological model to reduce the size of the requested data. The time frame for the ERA5 data is set be one month, ending at the provided month in **thisym**. SEAS5 is downloaded as the forecast at the provided month, to 7 months after the provided month. The download request is sent using the [CDS API](https://cds.climate.copernicus.eu/api-how-to), and is executed by the `download_data.py` script.
 
-Create a figure showing the results of the model output. Currently creates a .png file with the
-discharge timeseries: a single line for the ERA5 simulation of the previous months, and the
-10-90 percentile values (specified with colored ranges) and the median value based on the
-ensemble SEAS5 simulations.
+    After downloading, both ERA5 and SEAS5 data are re-gridded to the model grid (using the `staticmaps.nc` from the wflow_sbm model configuration). A lapse rate correction is applied to the temperature to correct for the elevation provided in the model configuration. Furthermore, the potential evaporation (PET) is calculated based on Makkink's equation (requiring temperature, pressure and incoming radiation data). The regridding, lapse rate correction and PET calculation is performed by the `convert_data.py` script that is called by this bash script.
 
-Usage:
-```
-python plot_wflow_results.py --output_dir "../../Data/model_output" --figure_out_dir "../../Public" --filename_figure "discharge_ts.png" --num_ensembles 51 --col_extract "Q_1" --start_date "2022_01"
-```
-`--output_dir` refers to the path of with the simulation results, `--filename_figure` is the
-filename of the resulting figure (including figure format), which will be saved in the folder
-specified by `--figure_out_dir`, `--num_ensembles` specifies the number of ensembles in SEAS5,
-`--col_extract` specifies which column in the Wflow output csv file needs to be extract, and
-`--start_date` the current month and year in YYYY_MM format.
+    ```bash
+    ./prepare.sh "2022_11" # download and convert ERA5 and SEAS5 data
+    ```
 
-## Folder structure
+- `wflow_catchup.sh` (**lastym**, in *YYYY_MM* format; **last2ym**, in *YYYY_MM* format)
+
+    When the ERA5 and SEAS5 data is downloaded and converted, the wflow_sbm model can be ran to ensure correct initial conditions when starting the forecasts simulations. This bash script calls `wflow_cli` with all correct run settings. The wflow_sbm models takes the initial conditions from the last ERA5 simulation (hence the **last2ym** argument), and starts the simulation with ERA5 data. The simulation stops at the point where the SEAS5 forecast starts, where the `wflow_batch.sh` script starts.
+
+    ```bash
+    ./wflow_catchup.sh "2022_10" "2022_09" # run the wflow_sbm model for 2022-10
+    ```
+
+- `wflow_batch.sh`(**thisym**, in *YYYY_MM* format; **lastym**, in *YYYY_MM* format)
+
+    After running the catchup job, the wflow_sbm model is started (through calling `wflow_cli`) for each of the 50 ensemble members in the SEAS5 forecast. The initial conditions from the catchup job are used to initialize the hydrological model. The 50 ensemble runs are run in parallel, as they are completely independent simulations.
+
+    ```bash
+    ./wflow_batch.sh "2022_11" "2022_10" # run the wflow_sbm model with forecasts starting at 2022-10
+    ```
+
+- `plotting.sh` (**thisym**, in *YYYY_MM* format)
+
+    After running the wflow_sbm simulations, the results are summarized in a hydrograph. The results of the 50 members are combined, and presented using percentile values (ranging between 10% and 90%, with intervals of 10%). This bash script calls the `plot_wflow_results.py` script, which produces the visualisation of the results. The figure (`discharge_ts.png`) is stored in the `Public` folder, in a subfolder indicating the start of the forecast data. Additionally, the `view_image.html` file is copied to this same folder, to allow to easily view this figure in the browser (rather than downloading the .png file).
+
+    ```bash
+    ./plotting_sh "2022_11" # plots the discharge simulations of the forecast that started at 2022-11
+    ```
+
+## Setting up the workflow
+
+1. Download `setup_directories.sh` script
+2. Modify the path the home of your project in line 10 in this script (`# project_home=/path/to/your/project`)
+3. Run `setup_directories.sh`, which clones this repo and corrects all paths with you project home
+
+### Other requirements
+
+- Model configuration files:
+
+    This workflow assumes you have already built a wflow_sbm model, and that this model is at the expected location (see folder structure below)
+
+- CDS API key
+
+    A CDS API key is required to download data from the Copernicus Data Store. See [this link](https://cds.climate.copernicus.eu/api-how-to) on how to set this up.
+
+- scrontab file to automatically trigger the workflow
+
+    A scrontab file is required to automatically trigger the workflow on every 15th day of the month. This should look something like this `0 0 15 * * /project/hrlsa/Software/scripts/workflow.sh`
+
+## Overview folder structure
+
+<details>
+  <summary>Click to view folder structure</summary>
+
 ```bash
 .
 ├── Data
-│   ├── Model_input
+│   ├── forcing
+│   │   ├── converted
+│   │   │   ├── forcing_ERA5_YYYY-MM-DD_YYYY-MM-DD.nc
+│   │   │   └── forcing_SEAS5_ensX_YYYY-MM-DD_YYYY-MM-DD.nc
+│   │   └── downloaded
+│   │       ├── ERA5_YYYY_MM.nc
+│   │       ├── orography_era5.grib
+│   │       ├── orography_seas5.grib
+│   │       └── SEAS5_YYYY_MM.nc
+│   ├── logs
+│   │   ├── cron.log
+│   │   ├── plotting.log
+│   │   ├── prepare.log
+│   │   ├── wflow-batch.log
+│   │   └── wflow-catchup.log
+│   ├── model_input
 │   │   ├── hydromt_data.yml
 │   │   ├── hydromt.log
+│   │   ├── instate
 │   │   ├── lake_hq_1244.csv
 │   │   ├── lake_hq_1248.csv
 │   │   ├── lake_hq_14005.csv
@@ -113,87 +116,50 @@ specified by `--figure_out_dir`, `--num_ensembles` specifies the number of ensem
 │   │   ├── lake_hq_14029.csv
 │   │   ├── lake_sh_1243.csv
 │   │   ├── lake_sh_1244.csv
-│   │   ├── run_wflow.jl                                        # Can this file be moved to the scripts directory?
-│   │   ├── staticgeoms
-│   │   │   ├── basins.geojson
-│   │   │   ├── gauges.geojson
-│   │   │   ├── gauges_grdc.geojson
-│   │   │   ├── gauges_wflow-gauges-extra.geojson
-│   │   │   ├── gauges_wflow-gauges-mainsub.geojson
-│   │   │   ├── gauges_wflow-gauges-rhineriv.geojson
-│   │   │   ├── glaciers.geojson
-│   │   │   ├── lakes.geojson
-│   │   │   ├── lakes_update.geojson
-│   │   │   ├── region.geojson
-│   │   │   ├── reservoirs.geojson
-│   │   │   ├── rivers.geojson
-│   │   │   ├── selected_grdc
-│   │   │   │   ├── selected_grdc_01.cpg
-│   │   │   │   ├── selected_grdc_01.dbf
-│   │   │   │   ├── selected_grdc_01.prj
-│   │   │   │   ├── selected_grdc_01.shp
-│   │   │   │   └── selected_grdc_01.shx
-│   │   │   ├──  subcatch_grdc.geojson
-│   │   │   ├──  subcatch_wflow-gauges-extra.geojson
-│   │   │   ├──  subcatch_wflow-gauges-mainsub.geojson
-│   │   │   └── subcatch_wflow-gauges-rhineriv.geojson
-│   │   ├── staticmaps.nc                                       # Also used by convert_data.py
-│   │   └── wflow_sbm_base.toml                                 # With baseline settings, details are adjusted by start_wflow.jl
-│   ├── Forcing
-│   │   ├── downloaded                                          # To store files created by download_data.py
-│   │   │   ├── ERA5_2021_12.nc
-│   │   │   └── SEAS5_2022_1.nc
-│   │   │   └── ...
-│   │   └── converted                                           # To store files created by convert_data.py, also required to run wflow
-│   │   │   ├── forcing_ERA5_2021-12-01_2021-12-31.nc
-│   │   │   ├── forcing_SEAS5_ens0_2022-01-01_2022-08-02.nc
-│   │   │   ├── forcing_SEAS5_ens1_2022-01-01_2022-08-02.nc
-│   │   │   ├── forcing_SEAS5_ens2_2022-01-01_2022-08-02.nc
-│   │   │   └── ...
-│   │   ├── orography_era5_rhine.grib                           # Required for convert_data.py
-│   │   └── orography_seas5_rhine.grib                          # Required for convert_data.py
-│   └── Model_output                                            # To store results of the model simulation
-│       ├── run_ERA5_2021_11                                    # ERA5 simulation result, directory name contains year_month of the simulated period
-│       │   ├── output.csv
-│       │   ├── output.nc
-│       │   └── outstates.nc                                    # Required to initialize the ERA5_2021_12 simulation
-│       ├── run_ERA5_2021_12                                    # ERA5 simulation result, directory name contains year_month of the simulated period
-│       │   ├── output.csv
-│       │   ├── output.nc
-│       │   └── outstates.nc                                    # Required to initialize the SEAS5_ensX_2022_1 simulations
-│       ├── run_SEAS5_ens0_2022_01                              # SEAS5 ensemble X simulation result, directory name contains year_month of the start of the simulated period
-│       │   ├── output.csv
-│       │   ├── output.nc
-│       │   └── outstates.nc
-│       ├── run_SEAS5_ens1_2022_01
-│       │   ├── output.csv
-│       │   ├── output.nc
-│       │   └── outstates.nc
-│       └── ...
-├── Public                                                      # Directory to store output (figures/processed model output) in, accessible from "outside"
-│   └── test.txt
-├── Share
-│   └── home
-|   │   ├── .cdsapirc                                           # needed to authenticate with the server
+│   │   ├── log.txt
+│   │   ├── staticmaps.nc
+│   │   └── wflow_sbm_static.toml
+│   └── model_output
+│       ├── run_ERA5_YYYY_MM
+│       │   ├── output.csv
+│       │   ├── output.nc
+│       │   └── outstates.nc
+│       └── run_SEAS5_ensX_YYYY_MM
+│           ├── output.csv
+│           ├── output.nc
+│           └── outstates.nc
+├── Public
+│   └── YYYY_MM
+│       ├── discharge_ts.png
+│       ├── orig_discharge_ts.png
+│       └── view_image.html
 └── Software
-    ├── cdsapirc.txt
+    ├── assets
+    │   └── view_image.html
     ├── images
+    │   ├── environment.yaml
+    │   ├── hrlsa.def
     │   ├── hrlsa_j.sif
     │   └── wflowjulia.sif
     ├── python
     │   ├── convert_data.py
-    │   └── download_data.py
-    ├── scripts
-    │   ├── prepare_data.sh
-    │   ├── prepare.sh
-    │   ├── run_wflow.sh
-    │   └── wflow.sh
+    │   ├── download_data.py
+    │   └── plot_wflow_results.py
+    ├── README.md
+    ├── requirements.txt
+    └── scripts
+        ├── plotting.sh
+        ├── prepare.sh
+        ├── setup_directories.sh
+        ├── wflow_batch.sh
+        ├── wflow_catchup.sh
+        └── workflow.sh
 ```
-
+</details>
 
 ## Notes
 
 From November 2022 a new version of ECMWF SEAS5 output substituted the old version. This new
 version (v5.1) will be labelled with the keyword `system=51`. See between the updates of 12
 October 2022 and 30 October 2022
-[here](https://confluence.ecmwf.int/display/CKB/Announcements).
+[here](https://confluence.ecmwf.int/display/CKB/Announcements). This system is automatically selected depending on the start of the forecasting period (when this workflow is used to perform hindcasts).
