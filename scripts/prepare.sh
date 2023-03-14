@@ -7,7 +7,9 @@
 #SBATCH -c 1
 #SBATCH -t 10:00:00
 
-project_home=/project/hrlsa
+project_home=to_be_modified
+# project_home=/project/hrlsa
+
 image_home=$project_home/Share/home
 image=$project_home/Software/images/hrlsa_j.sif
 

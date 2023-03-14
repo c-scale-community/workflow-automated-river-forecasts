@@ -11,8 +11,9 @@
 # start_forecast start time of the forecast in YYYY_MM format
 # start_input start time of the data in YYYY_MM format
 
-project_home=/project/hrlsa
-image=$project_home/Software/images/wflowjulia.sif
+project_home=to_be_modified
+# project_home=/project/hrlsa
+image=$project_home/Software/images/wflow_063.sif
 
 output_dir=$project_home/Data/model_output/run_ERA5_$1
 input_dir=$project_home/Data/model_output/run_ERA5_$2
