@@ -3,7 +3,6 @@
 project_home=to_be_modified
 # project_home=/project/hrlsa
 scriptsdir="$project_home/Software/scripts"
-logdir = "$project_home/Data/logs/prepare.log"
 
 # d=$(date)
 tmp=${1-$(date)}
@@ -13,7 +12,7 @@ lastym=$(date --date "$d -1 month" "+%Y_%m")
 last2ym=$(date --date "$d -2 month" "+%Y_%m")
 
 # Download and convert data
-preparejobid=$(sbatch --output=$logdir/prepare.log $scriptsdir/prepare.sh $thisym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
+preparejobid=$(sbatch $scriptsdir/prepare.sh $thisym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
 echo "started data prep job with id: $preparejobid"
 # Catch up with real data
 catchupjobid=$(sbatch --dependency=afterok:$preparejobid $scriptsdir/wflow_catchup.sh $lastym $last2ym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
