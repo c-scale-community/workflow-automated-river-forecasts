@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #SBATCH --job-name=prepare
-#SBATCH --output=/project/hrlsa/Data/logs/prepare.log
+#SBATCH --output=to_be_modified/Data/logs/prepare.log
 #
 #SBATCH -N 1
 #SBATCH -c 1

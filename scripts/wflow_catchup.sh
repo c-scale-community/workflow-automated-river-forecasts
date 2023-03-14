@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #SBATCH --job-name=wflow-catchup
-#SBATCH --output=/project/hrlsa/Data/logs/wflow-catchup.log
+#SBATCH --output=to_be_modified/Data/logs/wflow-catchup.log
 #
 #SBATCH -N 1
 #SBATCH -c 1

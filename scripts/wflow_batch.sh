@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #SBATCH --job-name=wflow-batch
-#SBATCH --output=/project/hrlsa/Data/logs/wflow-batch.log
+#SBATCH --output=to_be_modified/Data/logs/wflow-batch.log
 #
 #SBATCH -N 1
 #SBATCH -c 1
