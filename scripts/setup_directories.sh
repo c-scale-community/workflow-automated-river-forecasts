@@ -9,7 +9,7 @@
 
 project_home=/project/lsda
 
-mkdir -p -m775 $project_home/{Data/{forcing/{converted,downloaded},model_input,model_output, logs},Public,Software}
+mkdir -p -m775 $project_home/{Data/{forcing/{converted,downloaded},model_input,model_output,logs},Public,Software,Share/home}
 
 # Git CLONE to $project_home/Software
 # Clone to GitHub folder, in order to copy correct files (with project_home) in the Software folder
@@ -25,3 +25,8 @@ sed -i "s|^project_home=to_be_modified|project_home=$project_home|" "$project_ho
 sed -i "s|^project_home=to_be_modified|project_home=$project_home|" "$project_home/Software/scripts/plotting.sh"
 sed -i "s|^project_home=to_be_modified|project_home=$project_home|" "$project_home/Software/scripts/workflow.sh"
 
+### ADD WFLOW IMAGE
+
+### BUILD PYTHON IMAGE
+
+### ADD CDSKEY FILE IN $project_home/Share/home/.cdsapirc
