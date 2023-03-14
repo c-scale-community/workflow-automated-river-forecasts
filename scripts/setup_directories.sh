@@ -19,8 +19,9 @@ git clone https://github.com/c-scale-community/use-case-high-res-land-surface-dr
 cp -a $project_home/Software/GitHub/. $project_home/Software
 
 # Replace project home in scripts with real project home
-sed -i "s|^to_be_modified|$project_home|" "$project_home/Software/scripts/prepare.sh"
-sed -i "s|^to_be_modified|$project_home|" "$project_home/Software/scripts/wflow_catchup.sh"
-sed -i "s|^to_be_modified|$project_home|" "$project_home/Software/scripts/wflow_batch.sh"
-sed -i "s|^to_be_modified|$project_home|" "$project_home/Software/scripts/plotting.sh"
-sed -i "s|^to_be_modified|$project_home|" "$project_home/Software/scripts/workflow.sh"
+sed -i "s|^project_home=to_be_modified|project_home=$project_home|" "$project_home/Software/scripts/prepare.sh"
+sed -i "s|^project_home=to_be_modified|project_home=$project_home|" "$project_home/Software/scripts/wflow_catchup.sh"
+sed -i "s|^project_home=to_be_modified|project_home=$project_home|" "$project_home/Software/scripts/wflow_batch.sh"
+sed -i "s|^project_home=to_be_modified|project_home=$project_home|" "$project_home/Software/scripts/plotting.sh"
+sed -i "s|^project_home=to_be_modified|project_home=$project_home|" "$project_home/Software/scripts/workflow.sh"
+
