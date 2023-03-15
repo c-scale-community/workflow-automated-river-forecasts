@@ -12,7 +12,7 @@ lastym=$(date --date "$d -1 month" "+%Y_%m")
 last2ym=$(date --date "$d -2 month" "+%Y_%m")
 
 # Download and convert data
-preparejobid=$(sbatch --export=ALL,project_home --output=$project_home/Data/logs/prepare.log $scriptsdir/prepare.sh $thisym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
+preparejobid=$(sbatch --export=ALL,$project_home --output=$project_home/Data/logs/prepare.log $scriptsdir/prepare.sh $thisym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
 echo "started data prep job with id: $preparejobid"
 # Catch up with real data
 catchupjobid=$(sbatch --export=ALL,project_home --output=$project_home/Data/logs/wflow-catchup.log --dependency=afterok:$preparejobid $scriptsdir/wflow_catchup.sh $lastym $last2ym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
