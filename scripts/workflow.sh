@@ -23,7 +23,3 @@ echo "started forecasting job with id: $forecastjobid"
 # Plotting
 plottingjobid=$(sbatch --export=ALL,PROJECT_HOME --output=$PROJECT_HOME/Data/logs/plotting.log --dependency=afterok:$forecastjobid $scriptsdir/plotting.sh $thisym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
 echo "started plotting job with id: $plottingjobid"
-
-sbatch --export=PROJECT_HOME=/project/lsda --output=/project/lsda/Data/logs/prepare.log /project/lsda/Software/scripts/prepare.sh "2023_02"
-
-sbatch --export=PROJECT_HOME=/project/lsda --output=~/log.log test.sh
