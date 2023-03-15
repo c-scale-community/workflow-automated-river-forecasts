@@ -6,6 +6,7 @@ Created on Fri Oct 29 14:33:40 2021
 import os
 import click
 import logging
+import hydromt
 import numpy as np
 import xarray as xr
 from dateutil.relativedelta import relativedelta
@@ -130,10 +131,10 @@ def convert_era5(filename, dem_model, dem_forcing, output_dir,
     # correct temperature based on high-res DEM
     t_add_elevation = temp_correction(dem_model, lapse_rate = lapse_rate)
     # Make sure both have the same x and y coords
-    t_out = t_out.assign_coords(x = t_add_elevation.x,
-                                y = t_add_elevation.y)
-    precip = precip.assign_coords(x = t_add_elevation.x,
-                                  y = t_add_elevation.y)
+    t_out = t_out.assign_coords(x = t_add_elevation[t_add_elevation.raster.x_dim],
+                                y = t_add_elevation[t_add_elevation.raster.y_dim])
+    precip = precip.assign_coords(x = t_add_elevation[t_add_elevation.raster.x_dim],
+                                  y = t_add_elevation[t_add_elevation.raster.y_dim])
     # Correct temperature and set a name
     temperature = t_out + t_add_elevation
     temperature.name = "t2m"
@@ -220,10 +221,10 @@ def convert_seas5(filename, dem_model, dem_forcing, output_dir, log,
         # correct temperature based on high-res DEM
         t_add_elevation = temp_correction(dem_model, lapse_rate = lapse_rate)
         # Make sure both have the same x and y coords
-        t_out = t_out.assign_coords(x = t_add_elevation.x,
-                                    y = t_add_elevation.y)
-        precip = precip.assign_coords(x = t_add_elevation.x,
-                                      y = t_add_elevation.y)
+        t_out = t_out.assign_coords(x = t_add_elevation[t_add_elevation.raster.x_dim],
+                                    y = t_add_elevation[t_add_elevation.raster.y_dim])
+        precip = precip.assign_coords(x = t_add_elevation[t_add_elevation.raster.x_dim],
+                                      y = t_add_elevation[t_add_elevation.raster.y_dim])
         # Correct temperature and set a name
         temperature = t_out + t_add_elevation
         temperature.name = "t2m"
