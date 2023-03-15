@@ -1,7 +1,6 @@
 #!/bin/bash
 #
 #SBATCH --job-name=plotting
-#SBATCH --output=to_be_modified/Data/logs/plotting.log
 #
 #SBATCH -N 1
 #SBATCH -c 1

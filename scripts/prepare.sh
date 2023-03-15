@@ -1,7 +1,6 @@
 #!/bin/bash
 #
 #SBATCH --job-name=prepare
-#SBATCH --output=$project_home/Data/logs/prepare.log
 #
 #SBATCH -N 1
 #SBATCH -c 1
