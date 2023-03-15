@@ -9,7 +9,7 @@
 # Usage <start_forecast>
 # start_forecast start time of the forecast in YYYY_MM format
 
-project_home=to_be_modified
+# project_home=to_be_modified
 # project_home=/project/hrlsa
 image=$project_home/Software/images/hrlsa_j.sif
 
