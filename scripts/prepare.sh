@@ -6,13 +6,13 @@
 #SBATCH -c 1
 #SBATCH -t 10:00:00
 
-image_home=$PROJECT_HOME/Share/home
-image=$PROJECT_HOME/Software/images/hrlsa_j.sif
+image_home=$project_home/Share/home
+image=$project_home/Software/images/hrlsa_j.sif
 
 # Download Data
 srun --nodes 1 --ntasks 1 singularity exec \
-        --bind $PROJECT_HOME/Data:/data \
-	--bind $PROJECT_HOME/Software/python:/opt/python \
+        --bind $project_home/Data:/data \
+	--bind $project_home/Software/python:/opt/python \
         -H $image_home:/home \
        	$image \
 	python /opt/python/download_data.py  \
@@ -22,9 +22,9 @@ srun --nodes 1 --ntasks 1 singularity exec \
 
 # Prepare Wflow input
 srun --nodes 1 --ntasks 1 singularity exec \
-	--bind $PROJECT_HOME/Data:/data \
-	--bind $PROJECT_HOME/Software/python:/opt/python \
-       	-H $PROJECT_HOME:/home \
+	--bind $project_home/Data:/data \
+	--bind $project_home/Software/python:/opt/python \
+       	-H $project_home:/home \
        	$image \
        	python /opt/python/convert_data.py \
        	--dir_downloads "/data/forcing/downloaded" \
