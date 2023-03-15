@@ -65,7 +65,7 @@ One main bash script orchestrates all steps in this workflow, with the arguments
 ## Setting up the workflow
 
 1. Download `setup_directories.sh` script
-2. Modify the path the home of your project in line 10 in this script (`# project_home=/path/to/your/project`)
+2. Modify the path the home of your project in line 10 in this script (`# PROJECT_HOME=/path/to/your/project`)
 3. Run `setup_directories.sh`, which clones this repo and corrects all paths with you project home
 
 ### Other requirements

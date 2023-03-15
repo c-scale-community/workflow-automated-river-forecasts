@@ -1,8 +1,8 @@
 # Runs the hrlsa workflow as one script, based on current month
 
-project_home=to_be_modified
-# project_home=/project/hrlsa
-scriptsdir="$project_home/Software/scripts"
+PROJECT_HOME=to_be_modified
+# PROJECT_HOME=/project/hrlsa
+scriptsdir="$PROJECT_HOME/Software/scripts"
 
 # d=$(date)
 tmp=${1-$(date)}
@@ -12,15 +12,18 @@ lastym=$(date --date "$d -1 month" "+%Y_%m")
 last2ym=$(date --date "$d -2 month" "+%Y_%m")
 
 # Download and convert data
-preparejobid=$(sbatch --export=project_home --output=$project_home/Data/logs/prepare.log $scriptsdir/prepare.sh $thisym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
+preparejobid=$(sbatch --export=ALL,PROJECT_HOME --output=$PROJECT_HOME/Data/logs/prepare.log $scriptsdir/prepare.sh $thisym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
 echo "started data prep job with id: $preparejobid"
 # Catch up with real data
-catchupjobid=$(sbatch --export=project_home --output=$project_home/Data/logs/wflow-catchup.log --dependency=afterok:$preparejobid $scriptsdir/wflow_catchup.sh $lastym $last2ym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
+catchupjobid=$(sbatch --export=ALL,PROJECT_HOME --output=$PROJECT_HOME/Data/logs/wflow-catchup.log --dependency=afterok:$preparejobid $scriptsdir/wflow_catchup.sh $lastym $last2ym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
 echo "started catchup job with id: $catchupjobid"
 # Forecast
-forecastjobid=$(sbatch --export=project_home --output=$project_home/Data/logs/wflow-batch.log --dependency=afterok:$catchupjobid $scriptsdir/wflow_batch.sh $thisym $lastym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
+forecastjobid=$(sbatch --export=ALL,PROJECT_HOME --output=$PROJECT_HOME/Data/logs/wflow-batch.log --dependency=afterok:$catchupjobid $scriptsdir/wflow_batch.sh $thisym $lastym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
 echo "started forecasting job with id: $forecastjobid"
 # Plotting
-plottingjobid=$(sbatch --export=project_home --output=$project_home/Data/logs/plotting.log --dependency=afterok:$forecastjobid $scriptsdir/plotting.sh $thisym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
+plottingjobid=$(sbatch --export=ALL,PROJECT_HOME --output=$PROJECT_HOME/Data/logs/plotting.log --dependency=afterok:$forecastjobid $scriptsdir/plotting.sh $thisym | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
 echo "started plotting job with id: $plottingjobid"
 
+sbatch --export=PROJECT_HOME=/project/lsda --output=/project/lsda/Data/logs/prepare.log /project/lsda/Software/scripts/prepare.sh "2023_02"
+
+sbatch --export=PROJECT_HOME=/project/lsda --output=~/log.log test.sh

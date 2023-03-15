@@ -9,25 +9,23 @@
 # Usage <start_forecast>
 # start_forecast start time of the forecast in YYYY_MM format
 
-# project_home=to_be_modified
-# project_home=/project/hrlsa
-image=$project_home/Software/images/hrlsa_j.sif
+image=$PROJECT_HOME/Software/images/hrlsa_j.sif
 
-output_dir=$project_home/Data/model_output
-figure_out_dir=$project_home/Public/$1
+output_dir=$PROJECT_HOME/Data/model_output
+figure_out_dir=$PROJECT_HOME/Public/$1
 
 # Create figure out directory if needed
 mkdir -p -m775 $figure_out_dir
 
 # Copy html for easy viewing of figure
-cp $project_home/Software/assets/view_image.html $figure_out_dir/view_image.html
+cp $PROJECT_HOME/Software/assets/view_image.html $figure_out_dir/view_image.html
 chmod 664 $figure_out_dir/view_image.html
 
 # Run plotting
 srun --nodes 1 --ntasks 1 singularity exec \
         --bind $output_dir:/tempdata \
         --bind $figure_out_dir:/tempout \
-	--bind $project_home/Software/python/plot_wflow_results.py:/data/plot_wflow_results.py \
+	--bind $PROJECT_HOME/Software/python/plot_wflow_results.py:/data/plot_wflow_results.py \
         --pwd /data \
         $image \
         python plot_wflow_results.py \
