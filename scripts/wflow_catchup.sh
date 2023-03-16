@@ -23,14 +23,12 @@ mkdir -p -m770 $output_dir
 
 # Run Wflow
 srun --nodes 1 --ntasks 1 singularity exec \
-        --bind $project_home/Data:/data \
-	--bind $input_dir:/tempdata/input \
-	--bind $output_dir:/tempdata/output \
-	--bind $project_home/Data/$c_fname/$forcing_name:/tempdata/forcing/forcing.nc \
-        --pwd /data \
-        $image \
-	/opt/wflow_cli/bin/wflow_cli /data/model_input/wflow_sbm_static.toml
-        # --output_dir "/data/model_output/run_ERA5_$1" \
-        # --instates_filename "/data/model_output/run_ERA5_$2" \
-        # --forcing_filename "/data/${c_fname}/$(ls ${project_home}/Data/${c_fname} | grep forcing_ERA5_`echo $1 | sed 's/_/-/g'`)"
+	--writable-tmpfs \
+    --bind $project_home/Data:/data \
+    --bind $input_dir:/tempdata/input \
+    --bind $output_dir:/tempdata/output \
+    --bind $project_home/Data/$c_fname/$forcing_name:/tempdata/forcing/forcing.nc \
+    --pwd /data \
+    $image \
+    /app/create_app/wflow_bundle/bin/wflow_cli /data/model_input/wflow_sbm_static.toml
 
