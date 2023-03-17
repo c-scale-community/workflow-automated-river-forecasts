@@ -21,4 +21,7 @@ sed -i "s|^project_home=to_be_modified|project_home=$project_home|" "$project_ho
 
 ### ADD CDSKEY FILE IN $project_home/Share/home/.cdsapirc
 
-### COPY wflow files
+### UPLOAD wflow files
+
+### SETUP SCRONTAB IN HOME DIRECTORY
+# 0 3 15 * * $project_home/Software/scripts/workflow.sh
