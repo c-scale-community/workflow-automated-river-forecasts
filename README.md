@@ -1,4 +1,6 @@
-# Automated monthly river forecasts
+# C-SCALE Workflow Solution: Automated monthly river forecasts using Wflow
+
+C-SCALE workflow solutions are intended to give users a template and reusable components to start building monitoring, modelling and forecasting applications
 
 Easily deploy a workflow that produces a monthly high resolution, ensemble river discharge forecast for a river basin of interest.
 
